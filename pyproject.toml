@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "web-search"
+version = "0.1.0"
+authors = [
+  { name="Chukwuma", email="chuks.@veedo.ai" },
+]
+description = "Async web search library supporting Google, Wikipedia, and arXiv"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "asyncio",
+    "httpx",
+    "beautifulsoup4",
+    "wikipedia",
+    "lxml"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/nwaughachukwuma/web-search"
+"Bug Tracker" = "https://github.com/nwaughachukwuma/web-search/issues"
+
+
+[tool.ruff]
+line-length = 120
+include = ["src/**/*.(py|pyi)", "tests/**/*.(py|pyi)", "pyproject.toml"]
+
+[tool.ruff.lint]
+select = ["D102", "F401"]
+
+[tool.ruff.lint.isort]
+case-sensitive = true
+relative-imports-order = "closest-to-furthest"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pylint]
+max-line-length = 120
+
+[tool.mypy]
+ignore_missing_imports = false
