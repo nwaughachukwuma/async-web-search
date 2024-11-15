@@ -64,11 +64,13 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        # with:
-        #   verify-metadata: false
-        #   skip-existing: true
-        #   verbose: true
-        #   print-hash: true
+        with:
+          verify-metadata: false
+          skip-existing: true
+          verbose: true
+          print-hash: true
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
 
   create-release:
     needs: build-and-publish
