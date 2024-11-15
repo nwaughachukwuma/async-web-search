@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+import os
 from typing import Literal
 
 SearchSources = Literal["google", "wikipedia", "arxiv"]
@@ -6,8 +7,8 @@ SearchSources = Literal["google", "wikipedia", "arxiv"]
 
 @dataclass
 class GoogleSearchConfig:
-    api_key: str
-    cse_id: str
+    api_key: str = os.environ["GOOGLE_API_KEY"]
+    cse_id: str = os.environ["CSE_ID"]
     max_results: int = 3
     app_domain: str | None = None
 

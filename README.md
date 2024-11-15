@@ -16,7 +16,7 @@ from web_search import WebSearch, WebSearchConfig, GoogleSearchConfig
 config = WebSearchConfig(
     sources=["google", "wikipedia"],
     google_config=GoogleSearchConfig(
-        api_key="your_api_key",
+        api_key="your_google_api_key",
         cse_id="your_cse_id"
     )
 )
