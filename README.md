@@ -5,7 +5,7 @@ Async web search library supporting Google Custom Search, Wikipedia, and arXiv A
 ## Installation
 
 ```bash
-pip install web-search
+pip install async-web-search
 ```
 
 ## Usage
