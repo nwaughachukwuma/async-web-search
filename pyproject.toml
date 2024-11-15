@@ -21,7 +21,6 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 dependencies = [
-    "asyncio",
     "httpx",
     "beautifulsoup4",
     "wikipedia",

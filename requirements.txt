@@ -1,4 +1,3 @@
-asyncio
 httpx
 wikipedia
 lxml
