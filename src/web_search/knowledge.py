@@ -7,10 +7,10 @@ from .config import KnowledgeSearchConfig, SearchResult
 
 
 class KnowledgeSearch:
-    config: KnowledgeSearchConfig
+    knowledge_config: KnowledgeSearchConfig
 
-    def __init__(self, config: KnowledgeSearchConfig | None = None):
-        self.config = config if config else KnowledgeSearchConfig()
+    def __init__(self, knowledge_config: KnowledgeSearchConfig | None = None):
+        self.knowledge_config = knowledge_config if knowledge_config else KnowledgeSearchConfig()
 
     async def fetch_knowledge(self, query: str):
         """
@@ -31,7 +31,7 @@ class KnowledgeSearch:
             if isinstance(result, list):
                 sources.extend(result)
 
-        sources = sources[: self.config.max_sources]
+        sources = sources[: self.knowledge_config.max_sources]
         return "\n\n".join(str(source) for source in sources if source.preview)
 
     async def _compile_wikipedia(self, query: str) -> str:
@@ -48,7 +48,7 @@ class KnowledgeSearch:
         """
         try:
             sources: list[SearchResult] = []
-            search_results = wikipedia.search(query, results=self.config.max_results)
+            search_results = wikipedia.search(query, results=self.knowledge_config.max_results)
 
             for title in search_results:
                 try:
@@ -60,9 +60,7 @@ class KnowledgeSearch:
                     if not preview:
                         continue
 
-                    sources.append(
-                        SearchResult(url=page.url, title=page.title, preview=preview)
-                    )
+                    sources.append(SearchResult(url=page.url, title=page.title, preview=preview))
                 except wikipedia.exceptions.DisambiguationError:
                     continue
                 except wikipedia.exceptions.PageError:
@@ -81,7 +79,7 @@ class KnowledgeSearch:
             params = {
                 "search_query": f"all:{query}",
                 "start": 0,
-                "max_results": self.config.max_results,
+                "max_results": self.knowledge_config.max_results,
                 "sortBy": "relevance",
                 "sortOrder": "descending",
             }
@@ -129,7 +127,7 @@ class KnowledgeSearch:
 
         result = ""
         for p in cleaned_paragraphs:
-            if len(result + p) <= self.config.max_preview_chars:
+            if len(result + p) <= self.knowledge_config.max_preview_chars:
                 result += p + "\n\n"
             else:
                 break

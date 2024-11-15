@@ -11,10 +11,10 @@ GOOGLE_SEARCH_URL = "https://www.googleapis.com/customsearch/v1"
 
 
 class GoogleSearch:
-    config: GoogleSearchConfig
+    google_config: GoogleSearchConfig
 
-    def __init__(self, config: GoogleSearchConfig | None = None):
-        self.config = config if config else GoogleSearchConfig()
+    def __init__(self, google_config: GoogleSearchConfig | None = None):
+        self.google_config = google_config if google_config else GoogleSearchConfig()
 
     async def _compile_google_search(self, query: str):
         results = await self._google_search(query)
@@ -26,28 +26,24 @@ class GoogleSearch:
         """
         params = {
             "q": unquote(query),
-            "key": self.config.api_key,
-            "cx": self.config.cse_id,
+            "key": self.google_config.api_key,
+            "cx": self.google_config.cse_id,
             "num": 5,
         }
         params.update(kwargs)
-        headers = {"Referer": self.config.app_domain}
+        headers = {"Referer": self.google_config.app_domain or ""}
 
         async with httpx.AsyncClient() as client:
-            response = await client.get(
-                GOOGLE_SEARCH_URL, params=params, headers=headers
-            )
+            response = await client.get(GOOGLE_SEARCH_URL, params=params, headers=headers)
             response.raise_for_status()
 
             json_data = response.json()
 
-        items = json_data.get("items", [])[: self.config.max_results]
+        items = json_data.get("items", [])[: self.google_config.max_results]
         result = await self.extract_relevant_items(items)
         return result
 
-    async def extract_relevant_items(
-        self, search_results: List[Dict[str, Any]]
-    ) -> List[SearchResult]:
+    async def extract_relevant_items(self, search_results: List[Dict[str, Any]]) -> List[SearchResult]:
         """
         Extract relevant items from the search results
         """
@@ -77,22 +73,15 @@ class GoogleSearch:
             ".rar",
         )
         invalid_domains = ("youtube.com", "vimeo.com", "facebook.com", "twitter.com")
-        return not (
-            url.endswith(invalid_extensions)
-            or any(domain in url for domain in invalid_domains)
-        )
+        return not (url.endswith(invalid_extensions) or any(domain in url for domain in invalid_domains))
 
-    async def _process_search_item(
-        self, url: str, item: Dict, char_limit=2000
-    ) -> SearchResult | None:
+    async def _process_search_item(self, url: str, item: Dict, char_limit=2000) -> SearchResult | None:
         """
         Process and fetch the result of a single search item url
         """
         try:
             content = await self._scrape_page_content(url)
-            return SearchResult(
-                url=url, title=item.get("title", ""), preview=content[:char_limit]
-            )
+            return SearchResult(url=url, title=item.get("title", ""), preview=content[:char_limit])
         except Exception:
             return None
 
@@ -107,9 +96,7 @@ class GoogleSearch:
 
             soup = BeautifulSoup(response.text, "lxml")
             # Remove unwanted elements
-            for element in soup.find_all(
-                ["script", "style", "nav", "header", "footer", "ads"]
-            ):
+            for element in soup.find_all(["script", "style", "nav", "header", "footer", "ads"]):
                 element.decompose()
 
             content_elements = soup.find_all(
@@ -123,9 +110,7 @@ class GoogleSearch:
 
             # Extract text from found elements
             content = "\n".join(
-                element.get_text(strip=True)
-                for element in content_elements
-                if element.get_text(strip=True)
+                element.get_text(strip=True) for element in content_elements if element.get_text(strip=True)
             )
 
             # If still no content, try getting all text
