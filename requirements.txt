@@ -4,6 +4,3 @@ wikipedia
 lxml
 beautifulsoup4
 python-dotenv
-
-# dev requirements
-ruff

@@ -3,18 +3,22 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "web-search"
-version = "0.1.0"
-authors = [
-  { name="Chukwuma", email="chuks.@veedo.ai" },
-]
-description = "Async web search library supporting Google, Wikipedia, and arXiv"
-readme = "README.md"
+name = "async-web-search"
 requires-python = ">=3.9"
+version = "0.1.0"
+description = "Async web search library supporting Google, Wikipedia, and arXiv"
+
+readme = "README.md"
+license = "MIT"
+authors = [
+  { name="Chukwuma" },
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 dependencies = [
     "asyncio",
@@ -28,6 +32,15 @@ dependencies = [
 "Homepage" = "https://github.com/nwaughachukwuma/web-search"
 "Bug Tracker" = "https://github.com/nwaughachukwuma/web-search/issues"
 
+[tool.hatch.build]
+include = [
+    "src/**/*.py",
+    "LICENSE",
+    "README.md"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/web_search"]
 
 [tool.ruff]
 line-length = 120
