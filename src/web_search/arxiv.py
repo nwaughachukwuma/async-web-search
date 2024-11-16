@@ -19,6 +19,9 @@ class ArxivSearch(BaseSearch):
         """
         Fetch papers from arXiv
         """
+        if not query:
+            raise ValueError("Query cannot be empty")
+
         ARXIV_URL = "http://export.arxiv.org/api/query"
         try:
             params = {

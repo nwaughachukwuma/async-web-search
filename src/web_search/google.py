@@ -25,6 +25,9 @@ class GoogleSearch(BaseSearch):
         """
         Perform a Google search using the Custom Search Engine API
         """
+        if not query:
+            raise ValueError("Query cannot be empty")
+
         params = {
             "q": unquote(query),
             "key": self.google_config.api_key,

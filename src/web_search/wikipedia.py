@@ -18,6 +18,9 @@ class WikipediaSearch(BaseSearch):
         """
         search Wikipedia for relevant articles
         """
+        if not query:
+            raise ValueError("Query cannot be empty")
+
         try:
             sources: list[SearchResult] = []
             search_results = wikipedia.search(query, results=self.wiki_config.max_results)

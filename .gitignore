@@ -5,3 +5,5 @@ venv/
 
 __ruff_cache__/
 dist/
+
+.env
