@@ -5,25 +5,29 @@ from urllib.parse import unquote
 import httpx
 from bs4 import BeautifulSoup
 
-from .config import GoogleSearchConfig, SearchResult
+from .base import BaseSearch, SearchResult
+from .config import GoogleSearchConfig
 
 GOOGLE_SEARCH_URL = "https://www.googleapis.com/customsearch/v1"
 
 
-class GoogleSearch:
+class GoogleSearch(BaseSearch):
     google_config: GoogleSearchConfig
 
     def __init__(self, google_config: GoogleSearchConfig | None = None):
         self.google_config = google_config if google_config else GoogleSearchConfig()
 
-    async def _compile_google_search(self, query: str):
-        results = await self._google_search(query)
+    async def _compile(self, query: str):
+        results = await self._search(query)
         return "\n\n".join(str(item) for item in results if item.preview)
 
-    async def _google_search(self, query: str, **kwargs):
+    async def _search(self, query: str, **kwargs):
         """
         Perform a Google search using the Custom Search Engine API
         """
+        if not query:
+            raise ValueError("Query cannot be empty")
+
         params = {
             "q": unquote(query),
             "key": self.google_config.api_key,
@@ -40,10 +44,10 @@ class GoogleSearch:
             json_data = response.json()
 
         items = json_data.get("items", [])[: self.google_config.max_results]
-        result = await self.extract_relevant_items(items)
+        result = await self._extract_relevant_items(items)
         return result
 
-    async def extract_relevant_items(self, search_results: List[Dict[str, Any]]) -> List[SearchResult]:
+    async def _extract_relevant_items(self, search_results: List[Dict[str, Any]]) -> List[SearchResult]:
         """
         Extract relevant items from the search results
         """
@@ -75,13 +79,15 @@ class GoogleSearch:
         invalid_domains = ("youtube.com", "vimeo.com", "facebook.com", "twitter.com")
         return not (url.endswith(invalid_extensions) or any(domain in url for domain in invalid_domains))
 
-    async def _process_search_item(self, url: str, item: Dict, char_limit=2000) -> SearchResult | None:
+    async def _process_search_item(self, url: str, item: Dict) -> SearchResult | None:
         """
         Process and fetch the result of a single search item url
         """
         try:
             content = await self._scrape_page_content(url)
-            return SearchResult(url=url, title=item.get("title", ""), preview=content[:char_limit])
+            return SearchResult(
+                url=url, title=item.get("title", ""), preview=content[: self.google_config.max_preview_chars]
+            )
         except Exception:
             return None
 

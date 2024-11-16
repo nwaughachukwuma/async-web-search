@@ -1,17 +1,18 @@
-from .search import WebSearch
+from .base import BaseSearch, SearchResult
 from .config import (
-    WebSearchConfig,
+    BaseConfig,
     GoogleSearchConfig,
-    KnowledgeSearchConfig,
     SearchSources,
-    SearchResult,
+    WebSearchConfig,
 )
+from .search import WebSearch
 
 __all__ = [
     "WebSearch",
     "WebSearchConfig",
     "GoogleSearchConfig",
-    "KnowledgeSearchConfig",
+    "BaseConfig",
     "SearchSources",
     "SearchResult",
+    "BaseSearch",
 ]

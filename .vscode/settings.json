@@ -1,0 +1,13 @@
+{
+	"cSpell.words": [],
+	"githubPullRequests.ignoredPullRequestBranches": ["main"],
+	"python.analysis.typeCheckingMode": "basic",
+	"[python]": {
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "charliermarsh.ruff",
+		"editor.codeActionsOnSave": {
+			"source.fixAll": "explicit",
+			"source.organizeImports": "explicit"
+		}
+	}
+}
