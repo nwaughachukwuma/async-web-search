@@ -11,6 +11,10 @@ on:
     tags:
       - "v*"
 
+env:
+  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+  CSE_ID: ${{ secrets.CSE_ID }}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
