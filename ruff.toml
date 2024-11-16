@@ -8,6 +8,9 @@ select = ["D102", "F401"]
 case-sensitive = true
 relative-imports-order = "closest-to-furthest"
 
+[lint.extend-per-file-ignores]
+"tests/**/*.py" = ["D102"]
+
 [format]
 quote-style = "double"
 indent-style = "space"
