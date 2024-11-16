@@ -2,6 +2,11 @@ name: Publish to PyPI
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/**"
+      - ".github/workflows/test_suite.yml"
   push:
     tags:
       - "v*"
@@ -32,7 +37,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest tests/ --cov=web_search --cov-report=xml
+          pytest tests/ -v --cov=web_search --cov-report=xml
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
@@ -42,6 +47,7 @@ jobs:
   build-and-publish:
     needs: test
     runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || github.event_name == 'workflow_dispatch'
     environment:
       name: pypi
       url: https://pypi.org/p/async-web-search
