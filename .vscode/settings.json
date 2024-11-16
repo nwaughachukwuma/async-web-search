@@ -1,6 +1,8 @@
 {
 	"cSpell.words": [],
-	"githubPullRequests.ignoredPullRequestBranches": ["main"],
+	"githubPullRequests.ignoredPullRequestBranches": [
+		"main"
+	],
 	"python.analysis.typeCheckingMode": "basic",
 	"[python]": {
 		"editor.formatOnSave": true,
@@ -9,5 +11,14 @@
 			"source.fixAll": "explicit",
 			"source.organizeImports": "explicit"
 		}
-	}
+	},
+	"python.testing.pytestArgs": [
+		"tests",
+		"-v",
+		"--cov=src",
+		"--cov-report=term-missing"
+	],
+	"python.testing.unittestEnabled": false,
+	"python.testing.pytestEnabled": true,
+	"python.testing.autoTestDiscoverOnSaveEnabled": true
 }

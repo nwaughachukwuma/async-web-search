@@ -19,7 +19,7 @@ class WikipediaSearch(BaseSearch):
         search Wikipedia for relevant articles
         """
         if not query:
-            raise ValueError("Query cannot be empty")
+            raise ValueError("Search query cannot be empty")
 
         try:
             sources: list[SearchResult] = []
