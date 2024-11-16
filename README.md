@@ -14,7 +14,7 @@ pip install async-web-search
 from web_search import WebSearch, WebSearchConfig, GoogleSearchConfig
 
 config = WebSearchConfig(
-    sources=["google", "wikipedia"],
+    sources=["google", "arxiv"],
     google_config=GoogleSearchConfig(
         api_key="your_google_api_key",
         cse_id="your_cse_id"
