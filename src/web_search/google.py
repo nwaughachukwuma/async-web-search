@@ -5,22 +5,23 @@ from urllib.parse import unquote
 import httpx
 from bs4 import BeautifulSoup
 
-from .config import GoogleSearchConfig, SearchResult
+from .config import GoogleSearchConfig
+from .base import BaseSearch, SearchResult
 
 GOOGLE_SEARCH_URL = "https://www.googleapis.com/customsearch/v1"
 
 
-class GoogleSearch:
+class GoogleSearch(BaseSearch):
     google_config: GoogleSearchConfig
 
     def __init__(self, google_config: GoogleSearchConfig | None = None):
         self.google_config = google_config if google_config else GoogleSearchConfig()
 
-    async def _compile_google_search(self, query: str):
+    async def _compile(self, query: str):
         results = await self._google_search(query)
         return "\n\n".join(str(item) for item in results if item.preview)
 
-    async def _google_search(self, query: str, **kwargs):
+    async def _search(self, query: str, **kwargs):
         """
         Perform a Google search using the Custom Search Engine API
         """
@@ -40,10 +41,10 @@ class GoogleSearch:
             json_data = response.json()
 
         items = json_data.get("items", [])[: self.google_config.max_results]
-        result = await self.extract_relevant_items(items)
+        result = await self._extract_relevant_items(items)
         return result
 
-    async def extract_relevant_items(self, search_results: List[Dict[str, Any]]) -> List[SearchResult]:
+    async def _extract_relevant_items(self, search_results: List[Dict[str, Any]]) -> List[SearchResult]:
         """
         Extract relevant items from the search results
         """

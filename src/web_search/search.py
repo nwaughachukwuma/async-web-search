@@ -3,7 +3,7 @@ from typing import Any, Coroutine, List
 
 from .config import WebSearchConfig
 from .google import GoogleSearch
-from .knowledge import KnowledgeSearch
+from .wikipedia import KnowledgeSearch
 
 
 class WebSearch(GoogleSearch, KnowledgeSearch):
@@ -11,7 +11,7 @@ class WebSearch(GoogleSearch, KnowledgeSearch):
         ws_config = config if config else WebSearchConfig()
 
         GoogleSearch.__init__(self, google_config=ws_config.google_config)
-        KnowledgeSearch.__init__(self, knowledge_config=ws_config.knowledge_config)
+        KnowledgeSearch.__init__(self, wiki_config=ws_config.wiki_config)
         self.sources = ws_config.sources
 
     async def search(self, query: str):

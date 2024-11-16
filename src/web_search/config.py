@@ -25,13 +25,3 @@ class WebSearchConfig:
     sources: list[SearchSources] = field(default_factory=lambda: ["google"])
     google_config: GoogleSearchConfig | None = None
     knowledge_config: KnowledgeSearchConfig | None = None
-
-
-@dataclass
-class SearchResult:
-    url: str
-    title: str
-    preview: str
-
-    def __str__(self):
-        return f"Title: {self.title}\nPreview: {self.preview}"
