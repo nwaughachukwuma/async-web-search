@@ -1,0 +1,13 @@
+line-length = 120
+include = ["src/**/*.(py|pyi)", "tests/**/*.(py|pyi)", "pyproject.toml"]
+
+[lint]
+select = ["D102", "F401"]
+
+[lint.isort]
+case-sensitive = true
+relative-imports-order = "closest-to-furthest"
+
+[format]
+quote-style = "double"
+indent-style = "space"
