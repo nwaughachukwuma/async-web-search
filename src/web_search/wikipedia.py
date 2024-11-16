@@ -1,17 +1,17 @@
 import wikipedia
 
-from .config import KnowledgeSearchConfig
 from .base import BaseSearch, SearchResult
+from .config import BaseConfig
 
 
 class WikipediaSearch(BaseSearch):
-    wiki_config: KnowledgeSearchConfig
+    wiki_config: BaseConfig
 
-    def __init__(self, wiki_config: KnowledgeSearchConfig | None = None):
-        self.wiki_config = wiki_config if wiki_config else KnowledgeSearchConfig()
+    def __init__(self, wiki_config: BaseConfig | None = None):
+        self.wiki_config = wiki_config if wiki_config else BaseConfig()
 
     async def _compile(self, query: str) -> str:
-        results = await self._search_wikipedia(query)
+        results = await self._search(query)
         return "\n\n".join(str(item) for item in results)
 
     async def _search(self, query: str) -> list[SearchResult]:

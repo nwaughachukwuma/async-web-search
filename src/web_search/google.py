@@ -5,8 +5,8 @@ from urllib.parse import unquote
 import httpx
 from bs4 import BeautifulSoup
 
-from .config import GoogleSearchConfig
 from .base import BaseSearch, SearchResult
+from .config import GoogleSearchConfig
 
 GOOGLE_SEARCH_URL = "https://www.googleapis.com/customsearch/v1"
 
@@ -18,7 +18,7 @@ class GoogleSearch(BaseSearch):
         self.google_config = google_config if google_config else GoogleSearchConfig()
 
     async def _compile(self, query: str):
-        results = await self._google_search(query)
+        results = await self._search(query)
         return "\n\n".join(str(item) for item in results if item.preview)
 
     async def _search(self, query: str, **kwargs):
@@ -76,13 +76,15 @@ class GoogleSearch(BaseSearch):
         invalid_domains = ("youtube.com", "vimeo.com", "facebook.com", "twitter.com")
         return not (url.endswith(invalid_extensions) or any(domain in url for domain in invalid_domains))
 
-    async def _process_search_item(self, url: str, item: Dict, char_limit=2000) -> SearchResult | None:
+    async def _process_search_item(self, url: str, item: Dict) -> SearchResult | None:
         """
         Process and fetch the result of a single search item url
         """
         try:
             content = await self._scrape_page_content(url)
-            return SearchResult(url=url, title=item.get("title", ""), preview=content[:char_limit])
+            return SearchResult(
+                url=url, title=item.get("title", ""), preview=content[: self.google_config.max_preview_chars]
+            )
         except Exception:
             return None
 

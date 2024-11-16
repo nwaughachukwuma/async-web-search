@@ -2,23 +2,29 @@ import httpx
 from bs4 import BeautifulSoup
 
 from .base import BaseSearch, SearchResult
+from .config import BaseConfig
 
 
 class ArxivSearch(BaseSearch):
+    arxiv_config: BaseConfig
+
+    def __init__(self, arxiv_config: BaseConfig | None = None):
+        self.arxiv_config = arxiv_config if arxiv_config else BaseConfig()
+
     async def _compile(self, query: str) -> str:
-        results = await self._search_arxiv_papers(query)
+        results = await self._search(query)
         return "\n\n".join(str(item) for item in results)
 
     async def _search(self, query: str) -> list[SearchResult]:
         """
-        Fetch papers from arXiv and other scientific sources
+        Fetch papers from arXiv
         """
         ARXIV_URL = "http://export.arxiv.org/api/query"
         try:
             params = {
                 "search_query": f"all:{query}",
                 "start": 0,
-                "max_results": self.knowledge_config.max_results,
+                "max_results": self.arxiv_config.max_results,
                 "sortBy": "relevance",
                 "sortOrder": "descending",
             }
