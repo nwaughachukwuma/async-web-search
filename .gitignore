@@ -7,9 +7,9 @@ __ruff_cache__/
 dist/
 
 .env
-.env.local
 .env.*
 !.env.example
+!.env.test
 
 .coverage
 .coverage.*
