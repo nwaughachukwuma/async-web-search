@@ -82,8 +82,8 @@ jobs:
           verify-metadata: false
           verbose: true
           print-hash: true
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          # user: __token__
+          # password: ${{ secrets.PYPI_API_TOKEN }}
 
   create-release:
     needs: build-and-publish
