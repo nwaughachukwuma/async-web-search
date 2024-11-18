@@ -8,11 +8,11 @@ from .config import (
 from .search import WebSearch
 
 __all__ = [
-    "WebSearch",
-    "WebSearchConfig",
-    "GoogleSearchConfig",
     "BaseConfig",
+    "BaseSearch",
+    "GoogleSearchConfig",
     "SearchSources",
     "SearchResult",
-    "BaseSearch",
+    "WebSearch",
+    "WebSearchConfig",
 ]

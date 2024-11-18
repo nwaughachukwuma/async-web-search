@@ -37,7 +37,7 @@ pip install async-web-search
 ### Example 1: Search across multiple sources
 
 ```python
-from web_search import WebSearch, WebSearchConfig, GoogleSearchConfig
+from web_search import WebSearch, WebSearchConfig
 
 config = WebSearchConfig(sources=["google", "arxiv"])
 results = await WebSearch(config).search("quantum computing")
@@ -48,7 +48,8 @@ print(results)
 ### Example 2: Google Search
 
 ```python
-from web_search import GoogleSearch, GoogleSearchConfig
+from web_search import GoogleSearchConfig
+from web_search.google import GoogleSearch
 
 config = GoogleSearchConfig(
     api_key="your_google_api_key",
@@ -64,7 +65,8 @@ for result in results:
 ### Example 3: Wikipedia Search
 
 ```python
-from web_search import WikipediaSearch, BaseConfig
+from web_search import BaseConfig
+from web_search.wikipedia import WikipediaSearch
 
 wiki_config = BaseConfig(max_results=5, max_preview_chars=500)
 results = await WikipediaSearch(wiki_config)._search("deep learning")
@@ -76,7 +78,8 @@ for result in results:
 ### Example 4: ArXiv Search
 
 ```python
-from web_search import ArxivSearch, BaseConfig
+from web_search import BaseConfig
+from web_search.arxiv import ArxivSearch
 
 arxiv_config = BaseConfig(max_results=3, max_preview_chars=800)
 results = await ArxivSearch(arxiv_config)._search("neural networks")
