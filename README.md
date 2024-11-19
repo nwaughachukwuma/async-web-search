@@ -92,7 +92,7 @@ for result in results:
 
 ### 🔧 Configuration
 
-- BaseConfig: Shared configuration for all sources (e.g., max_results, max_preview_chars).
+- BaseConfig: Shared configuration for all sources (e.g., max_results, max_preview_chars, and timeout).
 - GoogleSearchConfig: Google-specific settings (e.g., api_key, cse_id).
 - WebSearchConfig: Configuration for the overall search process (e.g., sources to query).
 

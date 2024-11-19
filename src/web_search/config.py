@@ -9,6 +9,7 @@ SearchSources = Literal["google", "wikipedia", "arxiv"]
 class BaseConfig:
     max_results: int = 3
     max_preview_chars: int = 1024
+    timeout: float | None = None
 
 
 @dataclass

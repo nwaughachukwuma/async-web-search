@@ -31,7 +31,8 @@ class ArxivSearch(BaseSearch):
                 "sortBy": "relevance",
                 "sortOrder": "descending",
             }
-            async with httpx.AsyncClient(timeout=20) as client:
+
+            async with httpx.AsyncClient(timeout=self.arxiv_config.timeout) as client:
                 response = await client.get(ARXIV_URL, params=params)
                 response.raise_for_status()
 

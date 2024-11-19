@@ -18,12 +18,15 @@ class GoogleSearch(BaseSearch):
         self.google_config = google_config if google_config else GoogleSearchConfig()
 
     async def _compile(self, query: str):
+        """
+        Search and compile the result
+        """
         results = await self._search(query)
         return "\n\n".join(str(item) for item in results if item.preview)
 
     async def _search(self, query: str, **kwargs):
         """
-        Perform a Google search using the Custom Search Engine API
+        Google search using the Custom Search Engine API
         """
         if not query:
             raise ValueError("Search query cannot be empty")
@@ -37,28 +40,26 @@ class GoogleSearch(BaseSearch):
         params.update(kwargs)
         headers = {"Referer": self.google_config.app_domain or ""}
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=self.google_config.timeout) as client:
             response = await client.get(GOOGLE_SEARCH_URL, params=params, headers=headers)
             response.raise_for_status()
-
             json_data = response.json()
 
         items = json_data.get("items", [])[: self.google_config.max_results]
-        result = await self._extract_relevant_items(items)
-        return result
+        return await self._extract_relevant_items(items)
 
     async def _extract_relevant_items(self, search_results: List[Dict[str, Any]]) -> List[SearchResult]:
         """
         Extract relevant items from the search results
         """
-        tasks: list[Coroutine[Any, Any, SearchResult | None]] = []
+        tasks: List[Coroutine[Any, Any, SearchResult | None]] = []
 
         for item in search_results:
             url = item.get("link")
             if url and self._is_valid_url(url):
                 tasks.append(self._process_search_item(url, item))
 
-        if not tasks:
+        if not len(tasks):
             return []
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -79,14 +80,16 @@ class GoogleSearch(BaseSearch):
         invalid_domains = ("youtube.com", "vimeo.com", "facebook.com", "twitter.com")
         return not (url.endswith(invalid_extensions) or any(domain in url for domain in invalid_domains))
 
-    async def _process_search_item(self, url: str, item: Dict) -> SearchResult | None:
+    async def _process_search_item(self, url: str, item: Dict[str, Any]) -> SearchResult | None:
         """
-        Process and fetch the result of a single search item url
+        Process a search url - includes scraping the webpage and cleaning the data
         """
         try:
             content = await self._scrape_page_content(url)
             return SearchResult(
-                url=url, title=item.get("title", ""), preview=content[: self.google_config.max_preview_chars]
+                url=url,
+                title=item.get("title", ""),
+                preview=content[: self.google_config.max_preview_chars],
             )
         except Exception:
             return None
@@ -96,7 +99,7 @@ class GoogleSearch(BaseSearch):
         Fetch and extract content from a webpage
         """
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=self.google_config.timeout) as client:
                 response = await client.get(url)
                 response.raise_for_status()
 
