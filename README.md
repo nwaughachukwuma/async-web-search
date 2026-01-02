@@ -66,7 +66,7 @@ for result in results:
 
 ```python
 from web_search import BaseConfig
-from web_search.wikipedia import WikipediaSearch
+from web_search.wikipedia_ import WikipediaSearch
 
 wiki_config = BaseConfig(max_results=5, max_preview_chars=500)
 results = await WikipediaSearch(wiki_config)._search("deep learning")

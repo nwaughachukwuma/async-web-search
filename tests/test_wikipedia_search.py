@@ -4,14 +4,14 @@ from unittest.mock import patch
 
 import pytest
 
-from src.web_search.wikipedia import WikipediaSearch
+from src.web_search.wikipedia_ import WikipediaSearch
 
 from .base_utils import BaseSearchTests
 
 
 @pytest.fixture
 def mock_search_handler():
-    with patch("src.web_search.wikipedia.WikipediaSearch._search") as mock_search:
+    with patch("src.web_search.wikipedia_.WikipediaSearch._search") as mock_search:
         yield mock_search
 
 

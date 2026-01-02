@@ -1,4 +1,4 @@
-import wikipedia
+import wikipedia as wiki
 
 from .base import BaseSearch, SearchResult
 from .config import BaseConfig
@@ -12,7 +12,7 @@ class WikipediaSearch(BaseSearch):
 
     async def _compile(self, query: str) -> str:
         results = await self._search(query)
-        return "\n\n".join(str(item) for item in results)
+        return "\n\n".join(str(r) for r in results)
 
     async def _search(self, query: str) -> list[SearchResult]:
         """
@@ -21,29 +21,24 @@ class WikipediaSearch(BaseSearch):
         if not query:
             raise ValueError("Search query cannot be empty")
 
-        try:
-            sources: list[SearchResult] = []
-            search_results = wikipedia.search(query, results=self.wiki_config.max_results)
+        sources: list[SearchResult] = []
+        search_results = wiki.search(query, results=self.wiki_config.max_results)
 
-            for title in search_results:
-                try:
-                    page = wikipedia.page(title)
-                    if not page.content:
-                        continue
-
-                    preview = self._extract_relevant_wiki_sections(page.content)
-                    if not preview:
-                        continue
-
-                    sources.append(SearchResult(url=page.url, title=page.title, preview=preview))
-                except wikipedia.exceptions.DisambiguationError:
-                    continue
-                except wikipedia.exceptions.PageError:
+        for title in search_results:
+            try:
+                page = wiki.page(title)
+                if not page.content:
                     continue
 
-            return sources
-        except Exception:
-            return []
+                preview = self._extract_relevant_wiki_sections(page.content)
+                if not preview:
+                    continue
+
+                sources.append(SearchResult(url=page.url, title=page.title, preview=preview))
+            except (wiki.exceptions.DisambiguationError, wiki.exceptions.PageError):
+                continue
+
+        return sources
 
     def _extract_relevant_wiki_sections(self, content: str) -> str:
         """

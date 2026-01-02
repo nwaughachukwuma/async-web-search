@@ -4,7 +4,7 @@ from typing import Any, Coroutine, List
 from .arxiv import ArxivSearch
 from .config import WebSearchConfig
 from .google import GoogleSearch
-from .wikipedia import WikipediaSearch
+from .wikipedia_ import WikipediaSearch
 
 
 class WebSearch:
@@ -29,4 +29,4 @@ class WebSearch:
             tasks.append(self.arxiv._compile(query))
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        return "\n\n".join(item for item in results if isinstance(item, str))
+        return "\n\n".join(r for r in results if isinstance(r, str))
