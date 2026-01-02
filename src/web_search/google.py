@@ -18,11 +18,8 @@ class GoogleSearch(BaseSearch):
         self.google_config = google_config if google_config else GoogleSearchConfig()
 
     async def _compile(self, query: str):
-        """
-        Search and compile the result
-        """
         results = await self._search(query)
-        return "\n\n".join(str(item) for item in results if item.preview)
+        return "\n\n".join(str(r) for r in results if r.preview)
 
     async def _search(self, query: str, **kwargs):
         """
@@ -52,7 +49,7 @@ class GoogleSearch(BaseSearch):
         """
         Extract relevant items from the search results
         """
-        tasks: List[Coroutine[Any, Any, SearchResult | None]] = []
+        tasks: List[Coroutine[Any, Any, SearchResult]] = []
 
         for item in search_results:
             url = item.get("link")
@@ -80,19 +77,16 @@ class GoogleSearch(BaseSearch):
         invalid_domains = ("youtube.com", "vimeo.com", "facebook.com", "twitter.com")
         return not (url.endswith(invalid_extensions) or any(domain in url for domain in invalid_domains))
 
-    async def _process_search_item(self, url: str, item: Dict[str, Any]) -> SearchResult | None:
+    async def _process_search_item(self, url: str, item: Dict[str, Any]):
         """
         Process a search url - includes scraping the webpage and cleaning the data
         """
-        try:
-            content = await self._scrape_page_content(url)
-            return SearchResult(
-                url=url,
-                title=item.get("title", ""),
-                preview=content[: self.google_config.max_preview_chars],
-            )
-        except Exception:
-            return None
+        content = await self._scrape_page_content(url)
+        return SearchResult(
+            url=url,
+            title=item.get("title", ""),
+            preview=content[: self.google_config.max_preview_chars],
+        )
 
     async def _scrape_page_content(self, url: str) -> str:
         """

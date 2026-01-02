@@ -1,5 +1,5 @@
 import httpx
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 from .base import BaseSearch, SearchResult
 from .config import BaseConfig
@@ -13,43 +13,46 @@ class ArxivSearch(BaseSearch):
 
     async def _compile(self, query: str) -> str:
         results = await self._search(query)
-        return "\n\n".join(str(item) for item in results)
+        return "\n\n".join(str(r) for r in results)
 
     async def _search(self, query: str) -> list[SearchResult]:
         """
-        Fetch papers from arXiv
+        Search by fetching papers from arXiv
         """
         if not query:
             raise ValueError("Search query cannot be empty")
 
-        ARXIV_URL = "http://export.arxiv.org/api/query"
+        ARXIV_URL = "https://export.arxiv.org/api/query"
+        params = {
+            "search_query": f"all:{query}",
+            "start": 0,
+            "max_results": self.arxiv_config.max_results,
+            "sortBy": "relevance",
+            "sortOrder": "descending",
+        }
+
+        async with httpx.AsyncClient(timeout=self.arxiv_config.timeout) as client:
+            response = await client.get(ARXIV_URL, params=params)
+            response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, "lxml-xml")
+        entries = soup.find_all("entry")
+
+        sources: list[SearchResult] = []
+        for entry in entries:
+            source = self._extract_search_result(entry)
+            if source:
+                sources.append(source)
+
+        return sources
+
+    def _extract_search_result(self, entry: Tag):
         try:
-            params = {
-                "search_query": f"all:{query}",
-                "start": 0,
-                "max_results": self.arxiv_config.max_results,
-                "sortBy": "relevance",
-                "sortOrder": "descending",
-            }
-
-            async with httpx.AsyncClient(timeout=self.arxiv_config.timeout) as client:
-                response = await client.get(ARXIV_URL, params=params)
-                response.raise_for_status()
-
-            soup = BeautifulSoup(response.text, "lxml-xml")
-            entries = soup.find_all("entry")
-
-            sources: list[SearchResult] = []
-            for entry in entries:
-                title = entry.title.text.strip()
-                url = entry.id.text.strip()
-                preview = entry.summary.text.strip()
-
-                if not preview:
-                    continue
-
-                sources.append(SearchResult(url=url, title=title, preview=preview))
-
-            return sources
+            url = entry.id.text.strip() if entry.id else ""
+            title = entry.title.text.strip() if entry.title else ""
+            preview = entry.summary.text.strip() if entry.summary else ""
+            if preview:
+                return SearchResult(url=url, title=title, preview=preview)
         except Exception:
-            return []
+            pass
+        return None
