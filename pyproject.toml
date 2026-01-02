@@ -24,7 +24,8 @@ dependencies = [
     "httpx",
     "beautifulsoup4",
     "wikipedia",
-    "lxml"
+    "lxml",
+    "python-dotenv"
 ]
 
 [project.urls]
