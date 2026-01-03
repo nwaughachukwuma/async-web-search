@@ -13,6 +13,15 @@ class SearchResult:
     def __str__(self):
         return f"Source: {self.source}\nTitle: {self.title}\nPreview: {self.preview}"
 
+    def to_dict(self):
+        """Convert SearchResult to a dictionary."""
+        return {
+            "url": self.url,
+            "title": self.title,
+            "preview": self.preview,
+            "source": str(self.source),
+        }
+
 
 class BaseSearch:
     def _handle(self, _query: str):

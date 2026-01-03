@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any, Coroutine, List
+from typing import Any, Coroutine, Dict, List
 
 from .arxiv import ArxivSearch
 from .base import SearchResult
@@ -24,7 +24,7 @@ class WebSearch:
         self.github = GitHubSearch(github_config=self.config.github_config)
         self.pubmed = PubMedSearch(pubmed_config=self.config.pubmed_config)
 
-    async def search(self, query: str) -> List[SearchResult]:
+    async def search(self, query: str) -> List[Dict[str, str]]:
         """
         Search the web for relevant content and return structured results
         """
@@ -44,7 +44,7 @@ class WebSearch:
             tasks.append(self.pubmed._handle(query))
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        return [item for r in results if not isinstance(r, BaseException) for item in r]
+        return [item.to_dict() for r in results if not isinstance(r, BaseException) for item in r]
 
     async def compile_search(self, query: str):
         """
