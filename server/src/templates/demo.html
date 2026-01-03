@@ -63,6 +63,10 @@
                         <input type="number" id="max_results" name="max_results" min="1" max="10"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2">
                     </div>
+
+                    <!-- Hidden radios to back the view-mode tabs so toggling updates config reliably -->
+                    <input class="sr-only" id="view-list" type="radio" name="view_mode" value="list">
+                    <input class="sr-only" id="view-json" type="radio" name="view_mode" value="json">
                 </form>
             </div>
         </details>
@@ -88,6 +92,14 @@
             </div>
         </form>
 
+        <!-- View Mode Tabs -->
+        <div id="view-tabs" class="mb-4 flex border-b border-gray-200">
+            <button data-mode="list" type="button"
+                class="px-4 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent focus:outline-none">List</button>
+            <button data-mode="json" type="button"
+                class="px-4 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent focus:outline-none">JSON</button>
+        </div>
+
         <div id="results"
             class="bg-white p-4 rounded-lg shadow min-h-[160px] flex items-center justify-center text-center">
             <p id="results-message" class="text-gray-500">Your results will appear here.</p>
@@ -99,11 +111,14 @@
         const collapsedKey = 'configCollapsed';
         // Base classes to maintain consistent panel styling across all states
         const basePanelClasses = 'bg-white p-4 rounded-lg shadow min-h-[160px]';
+        // Store last search results to re-display when view mode changes
+        let lastResults = null;
 
         function loadConfig() {
             const config = JSON.parse(localStorage.getItem(configKey)) || {
                 sources: ['google'],
                 max_results: 3,
+                view_mode: 'list',
             };
 
             // Set sources
@@ -114,23 +129,29 @@
             // Set other fields
             document.getElementById('max_results').value = config.max_results;
 
+            // Set view mode
+            document.querySelectorAll('input[name="view_mode"]').forEach(rb => {
+                rb.checked = rb.value === config.view_mode;
+            });
+
             return config;
         }
 
         function saveConfig() {
             const sources = Array.from(document.querySelectorAll('input[name="sources"]:checked')).map(cb => cb.value);
             const max_results = parseInt(document.getElementById('max_results').value) || 3;
+            const view_mode = document.querySelector('input[name="view_mode"]:checked')?.value || 'list';
 
-            const config = { sources, max_results };
+            const config = { sources, max_results, view_mode };
             localStorage.setItem(configKey, JSON.stringify(config));
             return config;
         }
 
         function displayResults(results) {
+            lastResults = results; // Store for re-displaying when view mode changes
+            const config = saveConfig(); // Get current config including view_mode
             const div = document.getElementById('results');
             div.innerHTML = '';
-            // Preserve the base panel and apply vertical layout for grouped results
-            div.className = `${basePanelClasses} flex flex-col space-y-6`;
 
             if (!results || (Array.isArray(results) && results.length === 0)) {
                 // Empty state – keep panel styling and center the message
@@ -151,6 +172,21 @@
                 console.error('Expected results to be an array, got:', results);
                 return;
             }
+
+            // Check view mode
+            if (config.view_mode === 'json') {
+                // JSON view
+                div.className = `${basePanelClasses} text-left`;
+                const pre = document.createElement('pre');
+                pre.className = 'text-sm text-gray-800 whitespace-pre-wrap overflow-auto';
+                pre.textContent = JSON.stringify(results, null, 2);
+                div.appendChild(pre);
+                return;
+            }
+
+            // List view (default)
+            // Preserve the base panel and apply vertical layout for grouped results
+            div.className = `${basePanelClasses} flex flex-col space-y-6`;
 
             // Group results by source
             const groupedResults = {};
@@ -228,8 +264,63 @@
             });
         }
 
+        // View mode buttons: ensure labels reflect radio button state
+        function updateViewModeButtons() {
+            document.querySelectorAll('input[name="view_mode"]').forEach(rb => {
+                const label = document.querySelector(`label[for="${rb.id}"]`);
+                if (!label) return;
+                if (rb.checked) {
+                    label.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                } else {
+                    label.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                }
+            });
+        }
+
+        // View mode tabs: update active styling
+        function updateViewTabs() {
+            const currentMode = document.querySelector('input[name="view_mode"]:checked')?.value || 'list';
+            document.querySelectorAll('#view-tabs button').forEach(btn => {
+                if (btn.dataset.mode === currentMode) {
+                    btn.classList.add('border-blue-600', 'text-blue-600');
+                    btn.classList.remove('text-gray-600');
+                } else {
+                    btn.classList.remove('border-blue-600', 'text-blue-600');
+                    btn.classList.add('text-gray-600');
+                }
+            });
+        }
+
         // Attach listeners to source inputs
         document.querySelectorAll('input[name="sources"]').forEach(cb => cb.addEventListener('change', () => { updateSourceChips(); saveConfig(); }));
+
+        // Attach listeners to view mode inputs
+        document.querySelectorAll('input[name="view_mode"]').forEach(rb => rb.addEventListener('change', () => {
+            updateViewModeButtons();
+            updateViewTabs();
+            saveConfig();
+            // Re-display results in new view mode if we have results
+            if (lastResults) {
+                displayResults(lastResults);
+            }
+        }));
+
+        // Tab click handlers
+        document.querySelectorAll('#view-tabs button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.mode;
+                const radio = document.querySelector(`input[name="view_mode"][value="${mode}"]`);
+                if (radio) {
+                    radio.checked = true;
+                }
+                updateViewModeButtons();
+                updateViewTabs();
+                saveConfig();
+                if (lastResults) {
+                    displayResults(lastResults);
+                }
+            });
+        });
 
         // Load collapsed state and animate the details panel height
         const detailsEl = document.getElementById('config-panel');
@@ -248,7 +339,7 @@
         }
 
         // Ensure correct height on init
-        setTimeout(() => { updateSourceChips(); setDetailsMaxHeight(); }, 20);
+        setTimeout(() => { updateSourceChips(); updateViewModeButtons(); updateViewTabs(); setDetailsMaxHeight(); }, 20);
 
         // Persist collapsed state and animate on toggle
         detailsEl.addEventListener('toggle', function () {
