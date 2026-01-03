@@ -89,7 +89,7 @@ async def search(request: SearchRequest):
 
     # Perform search
     try:
-        results = await WebSearch(config).search(request.query)  # type: ignore
+        results = await WebSearch(config).search(request.query)
         return {"results": results}
     except Exception as e:
         raise HTTPException(500, f"Internal server error: {str(e)}")

@@ -27,7 +27,11 @@ async def test_search_successful_request(client):
     # Mock the WebSearch class
     with patch("src.index.WebSearch") as mock_websearch_class:
         mock_websearch_instance = AsyncMock()
-        mock_websearch_instance.search = AsyncMock(return_value="Mocked search results")
+        mock_websearch_instance.search = AsyncMock(
+            return_value=[
+                {"url": "https://example.com", "title": "Test Result", "preview": "Test preview", "source": "google"}
+            ]
+        )
         mock_websearch_class.return_value = mock_websearch_instance
 
         response = client.post("/search", json=payload)
@@ -35,7 +39,9 @@ async def test_search_successful_request(client):
         assert response.status_code == 200
         data = response.json()
         assert "results" in data
-        assert data["results"] == "Mocked search results"
+        assert isinstance(data["results"], list)
+        assert len(data["results"]) == 1
+        assert data["results"][0]["title"] == "Test Result"
 
         # Verify WebSearch was called with correct config
         mock_websearch_class.assert_called_once()
@@ -95,14 +101,31 @@ async def test_search_multiple_sources(client):
 
     with patch("src.index.WebSearch") as mock_websearch_class:
         mock_websearch_instance = AsyncMock()
-        mock_websearch_instance.search = AsyncMock(return_value="Multi-source results")
+        mock_websearch_instance.search = AsyncMock(
+            return_value=[
+                {
+                    "url": "https://google.com",
+                    "title": "Google Result",
+                    "preview": "Google preview",
+                    "source": "google",
+                },
+                {"url": "https://arxiv.com", "title": "ArXiv Result", "preview": "ArXiv preview", "source": "arxiv"},
+                {
+                    "url": "https://github.com",
+                    "title": "GitHub Result",
+                    "preview": "GitHub preview",
+                    "source": "github",
+                },
+            ]
+        )
         mock_websearch_class.return_value = mock_websearch_instance
 
         response = client.post("/search", json=payload)
 
         assert response.status_code == 200
         data = response.json()
-        assert data["results"] == "Multi-source results"
+        assert isinstance(data["results"], list)
+        assert len(data["results"]) == 3
 
 
 @pytest.mark.asyncio

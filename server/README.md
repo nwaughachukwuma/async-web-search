@@ -22,7 +22,20 @@ A FastAPI-based production server is available at **https://awebs.veedo.ai** for
 
 ```json
 {
-  "results": "Compiled search results from all specified sources..."
+  "results": [
+    {
+      "url": "https://example.com/article",
+      "title": "Example Article Title",
+      "preview": "This is a preview of the article content...",
+      "source": "google"
+    },
+    {
+      "url": "https://arxiv.org/pdf/1234.5678",
+      "title": "ArXiv Paper Title",
+      "preview": "Abstract: This paper discusses...",
+      "source": "arxiv"
+    }
+  ]
 }
 ```
 
