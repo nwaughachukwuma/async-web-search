@@ -2,7 +2,7 @@
 
 Async web search library supporting Google Custom Search, Wikipedia, arXiv, NewsAPI, GitHub, and PubMed APIs.
 
-> You can search across multiple sources and retrieve relevant, clean, and formatted results efficiently.
+> You can search across multiple sources and retrieve relevant, clean results in JSON format or as compiled text.
 
 ## 🌟 Features
 
@@ -46,7 +46,24 @@ from web_search import WebSearch, WebSearchConfig
 config = WebSearchConfig(sources=["google", "arxiv", "github", "newsapi", "pubmed"])
 results = await WebSearch(config).search("quantum computing")
 
-print(results)
+# results is a list of dicts with keys: url, title, preview, source
+for result in results:
+    print(f"Title: {result['title']}")
+    print(f"URL: {result['url']}")
+    print(f"Preview: {result['preview']}")
+    print(f"Source: {result['source']}")
+    print("---")
+```
+
+### Example 1.1: Compiled search results as string
+
+```python
+from web_search import WebSearch, WebSearchConfig
+
+config = WebSearchConfig(sources=["google", "arxiv", "github"])
+compiled_results = await WebSearch(config).compile_search("quantum computing")
+
+print(compiled_results)  # Prints a formatted string with all results
 ```
 
 ### Example 2: Google Search

@@ -25,7 +25,7 @@ async def test_search_successful_request(client):
     }
 
     # Mock the WebSearch class
-    with patch("server.index.WebSearch") as mock_websearch_class:
+    with patch("src.index.WebSearch") as mock_websearch_class:
         mock_websearch_instance = AsyncMock()
         mock_websearch_instance.search = AsyncMock(return_value="Mocked search results")
         mock_websearch_class.return_value = mock_websearch_instance
@@ -93,7 +93,7 @@ async def test_search_multiple_sources(client):
         "max_results": 3,
     }
 
-    with patch("server.index.WebSearch") as mock_websearch_class:
+    with patch("src.index.WebSearch") as mock_websearch_class:
         mock_websearch_instance = AsyncMock()
         mock_websearch_instance.search = AsyncMock(return_value="Multi-source results")
         mock_websearch_class.return_value = mock_websearch_instance
@@ -113,7 +113,7 @@ async def test_search_internal_error(client):
         "sources": ["google"],
     }
 
-    with patch("server.index.WebSearch") as mock_websearch_class:
+    with patch("src.index.WebSearch") as mock_websearch_class:
         mock_websearch_instance = AsyncMock()
         mock_websearch_instance.search = AsyncMock(side_effect=Exception("Internal error"))
         mock_websearch_class.return_value = mock_websearch_instance

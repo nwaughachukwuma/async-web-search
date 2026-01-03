@@ -1,3 +1,5 @@
+from typing import List
+
 import wikipedia as wiki
 
 from .base import BaseSearch, SearchResult
@@ -10,18 +12,21 @@ class WikipediaSearch(BaseSearch):
     def __init__(self, wiki_config: BaseConfig | None = None):
         self.wiki_config = wiki_config if wiki_config else BaseConfig()
 
+    async def _handle(self, query: str) -> List[SearchResult]:
+        return await self._search(query)
+
     async def _compile(self, query: str) -> str:
         results = await self._search(query)
         return "\n\n".join(str(r) for r in results)
 
-    async def _search(self, query: str) -> list[SearchResult]:
+    async def _search(self, query: str) -> List[SearchResult]:
         """
         search Wikipedia for relevant articles
         """
         if not query:
             raise ValueError("Search query cannot be empty")
 
-        sources: list[SearchResult] = []
+        sources: List[SearchResult] = []
         search_results = wiki.search(query, results=self.wiki_config.max_results)
 
         for title in search_results:
@@ -34,7 +39,14 @@ class WikipediaSearch(BaseSearch):
                 if not preview:
                     continue
 
-                sources.append(SearchResult(url=page.url, title=page.title, preview=preview))
+                sources.append(
+                    SearchResult(
+                        url=page.url,
+                        title=page.title,
+                        preview=preview,
+                        source="wikipedia",
+                    )
+                )
             except (wiki.exceptions.DisambiguationError, wiki.exceptions.PageError):
                 continue
 

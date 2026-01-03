@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 import httpx
 
 from .base import BaseSearch, SearchResult
@@ -10,11 +12,14 @@ class GitHubSearch(BaseSearch):
     def __init__(self, github_config: BaseConfig | None = None):
         self.github_config = github_config if github_config else BaseConfig()
 
+    async def _handle(self, query: str) -> List[SearchResult]:
+        return await self._search(query)
+
     async def _compile(self, query: str) -> str:
         results = await self._search(query)
         return "\n\n".join(str(r) for r in results)
 
-    async def _search(self, query: str) -> list[SearchResult]:
+    async def _search(self, query: str) -> List[SearchResult]:
         """
         Search GitHub repositories
         """
@@ -35,7 +40,7 @@ class GitHubSearch(BaseSearch):
             data = response.json()
 
         items = data.get("items", [])
-        sources: list[SearchResult] = []
+        sources: List[SearchResult] = []
         for item in items:
             source = self._extract_search_result(item)
             if source:
@@ -43,7 +48,7 @@ class GitHubSearch(BaseSearch):
 
         return sources
 
-    def _extract_search_result(self, item: dict):
+    def _extract_search_result(self, item: Dict):
         try:
             url = item.get("html_url", "")
             title = item.get("name", "")
@@ -51,7 +56,7 @@ class GitHubSearch(BaseSearch):
             if preview:
                 if len(preview) > self.github_config.max_preview_chars:
                     preview = preview[: self.github_config.max_preview_chars] + "..."
-                return SearchResult(url=url, title=title, preview=preview)
+                return SearchResult(url=url, title=title, preview=preview, source="github")
         except Exception:
             pass
         return None
