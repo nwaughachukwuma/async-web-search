@@ -2,8 +2,7 @@ import os
 
 import pytest
 from fastapi.testclient import TestClient
-
-from server import app
+from src.index import app
 
 
 @pytest.fixture(autouse=True)

@@ -2,6 +2,7 @@ import os
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
 from web_search import BaseConfig, GoogleSearchConfig, NewsAPISearchConfig, SearchSources, WebSearch, WebSearchConfig
@@ -25,6 +26,14 @@ def root():
         "message": "Async WebSearch Demo API",
         "docs": "/docs",
     }
+
+
+@app.get("/demo", response_class=HTMLResponse)
+def demo():
+    template_path = os.path.join(os.path.dirname(__file__), "templates", "demo.html")
+    with open(template_path, "r") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
 
 
 @app.post("/search")
@@ -81,7 +90,7 @@ async def search(request: SearchRequest):
     # Perform search
     try:
         web_search = WebSearch(config)
-        results = await web_search.search(request.query)
+        results = await web_search.search(request.query)  # type: ignore
         return {"results": results}
     except Exception as e:
         raise HTTPException(500, f"Internal server error: {str(e)}")
