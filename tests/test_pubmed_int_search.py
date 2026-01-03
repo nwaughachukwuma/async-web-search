@@ -4,6 +4,8 @@ from src.web_search.pubmed import PubMedSearch
 
 
 @pytest.mark.asyncio
+@pytest.mark.integration
+@pytest.mark.skip(reason="Live integration test - run selectively")
 async def test_pubmed_search():
     results = await PubMedSearch()._search(query="cancer immunotherapy")
     assert len(results) > 0
