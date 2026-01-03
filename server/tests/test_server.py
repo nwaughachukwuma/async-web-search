@@ -52,16 +52,16 @@ async def test_search_missing_google_keys(client, monkeypatch):
         "max_results": 2,
     }
 
-    # Mock missing environment variables
-    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
-    monkeypatch.delenv("CSE_ID", raising=False)
+    # Mock missing environment variables by setting them to empty strings
+    monkeypatch.setenv("GOOGLE_API_KEY", "")
+    monkeypatch.setenv("CSE_ID", "")
 
     response = client.post("/search", json=payload)
 
     assert response.status_code == 500
     data = response.json()
     assert "detail" in data
-    assert "Google API configuration missing" in data["detail"]
+    assert "GOOGLE_API_KEY or CSE_ID is missing" in data["detail"]
 
 
 @pytest.mark.asyncio
@@ -73,15 +73,15 @@ async def test_search_missing_newsapi_key(client, monkeypatch):
         "max_results": 2,
     }
 
-    # Mock missing environment variable
-    monkeypatch.delenv("NEWS_API_KEY", raising=False)
+    # Mock missing environment variable by setting it to empty string
+    monkeypatch.setenv("NEWS_API_KEY", "")
 
     response = client.post("/search", json=payload)
 
     assert response.status_code == 500
     data = response.json()
     assert "detail" in data
-    assert "NewsAPI configuration missing" in data["detail"]
+    assert "NEWS_API_KEY is missing" in data["detail"]
 
 
 @pytest.mark.asyncio
