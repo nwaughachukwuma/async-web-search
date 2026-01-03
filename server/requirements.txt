@@ -2,5 +2,7 @@ async-web-search
 fastapi
 httpx
 pydantic
+pytest
+pytest-asyncio
 python-dotenv
 uvicorn[standard]
