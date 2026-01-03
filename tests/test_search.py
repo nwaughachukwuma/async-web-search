@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from src.web_search.base import SearchResult
 from src.web_search.config import WebSearchConfig
 from src.web_search.search import WebSearch
 
@@ -30,7 +31,7 @@ async def test_websearch_with_multiple_sources():
         search.pubmed = AsyncMock()
         search.pubmed._compile = AsyncMock(return_value="Pubmed results")
 
-        result = await search.search("test query")
+        result = await search.compile_search("test query")
 
         # Check that only specified sources were called
         search.google._compile.assert_called_once_with("test query")
@@ -69,7 +70,7 @@ async def test_websearch_with_all_sources():
         search.pubmed = AsyncMock()
         search.pubmed._compile = AsyncMock(return_value="PubMed")
 
-        result = await search.search("test query")
+        result = await search.compile_search("test query")
 
         # All sources should be called
         search.google._compile.assert_called_once_with("test query")
@@ -102,7 +103,97 @@ async def test_websearch_handles_exceptions():
         search.newsapi = AsyncMock()
         search.pubmed = AsyncMock()
 
-        result = await search.search("test query")
+        result = await search.compile_search("test query")
 
         # Should only include successful results
         assert result == "Google results"
+
+
+@pytest.mark.asyncio
+async def test_websearch_search_returns_json():
+    """
+    Test that WebSearch.search returns JSON-serializable list of dicts
+    """
+    config = WebSearchConfig(sources=["google", "arxiv"])
+
+    # Mock the _handle methods
+    with patch.object(WebSearch, "__init__", lambda self, config: None):
+        search = WebSearch(config)
+        search.config = config
+        search.google = AsyncMock()
+        search.google._handle = AsyncMock(
+            return_value=[
+                SearchResult(url="https://google.com/1", title="Google Result 1", preview="Preview 1", source="google")
+            ]
+        )
+        search.arxiv = AsyncMock()
+        search.arxiv._handle = AsyncMock(
+            return_value=[
+                SearchResult(url="https://arxiv.com/1", title="ArXiv Result 1", preview="Preview 2", source="arxiv")
+            ]
+        )
+        search.wikipedia = AsyncMock()
+        search.wikipedia._handle = AsyncMock(return_value=[])
+        search.github = AsyncMock()
+        search.github._handle = AsyncMock(return_value=[])
+        search.newsapi = AsyncMock()
+        search.newsapi._handle = AsyncMock(return_value=[])
+        search.pubmed = AsyncMock()
+        search.pubmed._handle = AsyncMock(return_value=[])
+
+        result = await search.search("test query")
+
+        # Check that only specified sources were called
+        search.google._handle.assert_called_once_with("test query")
+        search.arxiv._handle.assert_called_once_with("test query")
+        search.wikipedia._handle.assert_not_called()
+        search.github._handle.assert_not_called()
+        search.newsapi._handle.assert_not_called()
+        search.pubmed._handle.assert_not_called()
+
+        # Check the result is a list of dicts
+        assert isinstance(result, list)
+        assert len(result) == 2
+        assert result[0] == {
+            "url": "https://google.com/1",
+            "title": "Google Result 1",
+            "preview": "Preview 1",
+            "source": "google",
+        }
+        assert result[1] == {
+            "url": "https://arxiv.com/1",
+            "title": "ArXiv Result 1",
+            "preview": "Preview 2",
+            "source": "arxiv",
+        }
+
+
+@pytest.mark.asyncio
+async def test_websearch_search_handles_exceptions():
+    """
+    Test that WebSearch.search handles exceptions from sources gracefully
+    """
+    config = WebSearchConfig(sources=["google", "arxiv"])
+
+    with patch.object(WebSearch, "__init__", lambda self, config: None):
+        search = WebSearch(config)
+        search.config = config
+        search.google = AsyncMock()
+        search.google._handle = AsyncMock(
+            return_value=[
+                SearchResult(url="https://google.com/1", title="Google Result", preview="Preview", source="google")
+            ]
+        )
+        search.arxiv = AsyncMock()
+        search.arxiv._handle = AsyncMock(side_effect=Exception("API Error"))
+        search.wikipedia = AsyncMock()
+        search.github = AsyncMock()
+        search.newsapi = AsyncMock()
+        search.pubmed = AsyncMock()
+
+        result = await search.search("test query")
+
+        # Should only include successful results
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0]["title"] == "Google Result"

@@ -12,6 +12,7 @@ class BaseSearchTests:
     """Base test class that all search test classes should inherit from"""
 
     search_class: Any  # Should be set by child classes
+    query: str = "python programming"  # Default query for live tests
 
     def test_initialization(self, search_instance):
         assert self.search_class is not None
@@ -57,10 +58,11 @@ class BaseSearchTests:
     async def test_live_search_integration(self):
         """Real integration test with actual API - should be run selectively"""
         source = self.search_class()
-        results = await source._search("python programming")
+        results = await source._search(self.query)
 
         assert isinstance(results, list)
         assert len(results) > 0
-
+        # Note: Some APIs may return 0 results due to rate limits or query specificity
+        # For now, just check that it's a list of SearchResult
         for result in results:
-            assert all(hasattr(result, key) for key in ["url", "title", "preview"])
+            assert all(hasattr(result, key) for key in ["url", "title", "preview", "source"])
