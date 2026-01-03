@@ -72,11 +72,4 @@ class WikipediaSearch(BaseSearch):
             )
         ]
 
-        result = ""
-        for p in cleaned_paragraphs:
-            if len(result + p) <= self.wiki_config.max_preview_chars:
-                result += p + "\n\n"
-            else:
-                break
-
-        return result.strip()
+        return "\n\n".join(p for p in cleaned_paragraphs).strip()

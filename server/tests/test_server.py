@@ -21,7 +21,6 @@ async def test_search_successful_request(client):
         "query": "test query",
         "sources": ["google"],
         "max_results": 2,
-        "max_preview_chars": 500,
     }
 
     # Mock the WebSearch class

@@ -89,7 +89,7 @@ for result in results:
 from web_search import BaseConfig
 from web_search.wikipedia_ import WikipediaSearch
 
-wiki_config = BaseConfig(max_results=5, max_preview_chars=500)
+wiki_config = BaseConfig(max_results=5)
 results = await WikipediaSearch(wiki_config)._search("deep learning")
 
 for result in results:
@@ -102,7 +102,7 @@ for result in results:
 from web_search import BaseConfig
 from web_search.arxiv import ArxivSearch
 
-arxiv_config = BaseConfig(max_results=3, max_preview_chars=800)
+arxiv_config = BaseConfig(max_results=3)
 results = await ArxivSearch(arxiv_config)._search("neural networks")
 
 for result in results:
@@ -119,7 +119,7 @@ See [`server/README.md`](server/README.md) for detailed API documentation, endpo
 
 ### 🔧 Configuration
 
-- BaseConfig: Shared configuration for all sources (e.g., max_results, max_preview_chars, and timeout).
+- BaseConfig: Shared configuration for all sources (e.g., max_results and timeout).
 - GoogleSearchConfig: Google-specific settings (e.g., api_key, cse_id).
 - WebSearchConfig: Configuration for the overall search process (e.g., sources to query).
 

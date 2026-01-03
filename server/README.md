@@ -13,7 +13,6 @@ A FastAPI-based production server is available at **https://awebs.veedo.ai** for
   "query": "machine learning",
   "sources": ["google", "arxiv", "github"],
   "max_results": 3,
-  "max_preview_chars": 1024,
   "timeout": 10.0
 }
 ```

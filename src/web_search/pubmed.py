@@ -1,3 +1,5 @@
+import asyncio
+import xml.etree.ElementTree as ET
 from typing import Dict, List
 
 import httpx
@@ -46,7 +48,52 @@ class PubMedSearch(BaseSearch):
         if not idlist:
             return []
 
-        # Then, get summaries
+        abstracts, summary_data = await asyncio.gather(self._fetch_abstracts(idlist), self._fetch_summaries(idlist))
+
+        result = summary_data.get("result", {})
+        sources: List[SearchResult] = []
+        for uid in idlist:
+            article = result.get(uid)
+            if article:
+                abstract = abstracts.get(uid, "")
+                source = self._extract_search_result(article, abstract)
+                if source:
+                    sources.append(source)
+
+        return sources
+
+    async def _fetch_abstracts(self, idlist: List[str]) -> Dict[str, str]:
+        """Fetch abstracts for given PubMed IDs"""
+        EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+        fetch_params = {"db": "pubmed", "id": ",".join(idlist), "retmode": "xml", "rettype": "abstract"}
+
+        try:
+            async with httpx.AsyncClient(
+                timeout=self.pubmed_config.timeout, headers={"User-Agent": "async-web-search/1.0"}
+            ) as client:
+                fetch_response = await client.get(EFETCH_URL, params=fetch_params)
+                fetch_response.raise_for_status()
+                xml_data = fetch_response.text
+
+            # Parse XML to extract abstracts
+            root = ET.fromstring(xml_data)
+            abstracts = {}
+
+            for article in root.findall(".//PubmedArticle"):
+                pmid_elem = article.find(".//PMID")
+                abstract_elem = article.find(".//AbstractText")
+
+                if pmid_elem is not None and abstract_elem is not None:
+                    pmid = pmid_elem.text
+                    abstract_text = "".join(abstract_elem.itertext())
+                    abstracts[pmid] = abstract_text
+
+            return abstracts
+        except Exception:
+            return {}
+
+    async def _fetch_summaries(self, idlist: List[str]) -> Dict:
+        """Fetch summaries for given PubMed IDs"""
         ESUMMARY_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
         summary_params = {
             "db": "pubmed",
@@ -59,30 +106,41 @@ class PubMedSearch(BaseSearch):
         ) as client:
             summary_response = await client.get(ESUMMARY_URL, params=summary_params)
             summary_response.raise_for_status()
-            summary_data = summary_response.json()
+            return summary_response.json()
 
-        result = summary_data.get("result", {})
-        sources: List[SearchResult] = []
-        for uid in idlist:
-            article = result.get(uid)
-            if article:
-                source = self._extract_search_result(article)
-                if source:
-                    sources.append(source)
+    def _build_preview(self, article: Dict) -> str:
+        """
+        Build preview text from abstract or metadata
+        """
+        parts = []
+        if journal := article.get("source"):
+            parts.append(journal)
+        if pubdate := article.get("pubdate"):
+            parts.append(pubdate)
+        if authors := article.get("authors"):
+            if authors and len(authors) > 0:
+                first_author = authors[0].get("name", "")
+                if first_author:
+                    parts.append(f"by {first_author} et al.")
 
-        return sources
+        if not parts:
+            raise ValueError("No metadata available for preview")
 
-    def _extract_search_result(self, article: Dict):
+        return " | ".join(parts)
+
+    def _extract_search_result(self, article: Dict, abstract: str):
         try:
             uid = article.get("uid", "")
             url = f"https://pubmed.ncbi.nlm.nih.gov/{uid}/"
             title = article.get("title", "")
-            # Use title as preview if no description
-            preview = article.get("description", [{}])[0].get("value", "") if article.get("description") else title
-            if preview:
-                if len(preview) > self.pubmed_config.max_preview_chars:
-                    preview = preview[: self.pubmed_config.max_preview_chars] + "..."
-                return SearchResult(url=url, title=title, preview=preview, source="pubmed")
+            preview = abstract if abstract else self._build_preview(article)
+
+            return SearchResult(
+                url=url,
+                title=title,
+                preview=preview,
+                source="pubmed",
+            )
         except Exception:
             pass
         return None
