@@ -1,0 +1,6 @@
+async-web-search
+fastapi
+httpx
+pydantic
+python-dotenv
+uvicorn[standard]
