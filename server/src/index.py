@@ -16,7 +16,6 @@ class SearchRequest(BaseModel):
     query: str
     sources: List[SearchSources] = ["google"]
     max_results: int = 3
-    max_preview_chars: int = 1024
     timeout: Optional[float] = None
 
 
@@ -44,7 +43,6 @@ async def search(request: SearchRequest):
     - **query**: Search query string
     - **sources**: List of sources to search (google, wikipedia, arxiv, newsapi, github, pubmed)
     - **max_results**: Maximum results per source (default: 3)
-    - **max_preview_chars**: Maximum characters in preview (default: 1024)
     - **timeout**: Request timeout in seconds (optional)
     """
     validate_api_keys(request.sources)
@@ -52,7 +50,6 @@ async def search(request: SearchRequest):
     # Build configs
     base_config = BaseConfig(
         max_results=request.max_results,
-        max_preview_chars=request.max_preview_chars,
         timeout=request.timeout,
     )
 
@@ -62,7 +59,6 @@ async def search(request: SearchRequest):
             api_key=os.environ["GOOGLE_API_KEY"],
             cse_id=os.environ["CSE_ID"],
             app_domain=os.environ.get("GOOGLE_APP_DOMAIN"),
-            max_preview_chars=base_config.max_preview_chars,
             max_results=base_config.max_results,
             timeout=base_config.timeout,
         )
@@ -71,7 +67,6 @@ async def search(request: SearchRequest):
     if "newsapi" in request.sources:
         newsapi_config = NewsAPISearchConfig(
             api_key=os.environ["NEWS_API_KEY"],
-            max_preview_chars=base_config.max_preview_chars,
             max_results=base_config.max_results,
             timeout=base_config.timeout,
         )

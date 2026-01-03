@@ -80,9 +80,12 @@ class PubMedSearch(BaseSearch):
             # Use title as preview if no description
             preview = article.get("description", [{}])[0].get("value", "") if article.get("description") else title
             if preview:
-                if len(preview) > self.pubmed_config.max_preview_chars:
-                    preview = preview[: self.pubmed_config.max_preview_chars] + "..."
-                return SearchResult(url=url, title=title, preview=preview, source="pubmed")
+                return SearchResult(
+                    url=url,
+                    title=title,
+                    preview=preview,
+                    source="pubmed",
+                )
         except Exception:
             pass
         return None

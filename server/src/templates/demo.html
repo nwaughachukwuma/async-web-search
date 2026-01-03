@@ -63,13 +63,6 @@
                         <input type="number" id="max_results" name="max_results" min="1" max="10"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2">
                     </div>
-
-                    <div>
-                        <label for="max_preview_chars" class="block text-sm font-medium text-gray-700">Max Preview
-                            Chars</label>
-                        <input type="number" id="max_preview_chars" name="max_preview_chars" min="100"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2">
-                    </div>
                 </form>
             </div>
         </details>
@@ -109,7 +102,6 @@
             const config = JSON.parse(localStorage.getItem(configKey)) || {
                 sources: ['google'],
                 max_results: 3,
-                max_preview_chars: 1024
             };
 
             // Set sources
@@ -119,7 +111,6 @@
 
             // Set other fields
             document.getElementById('max_results').value = config.max_results;
-            document.getElementById('max_preview_chars').value = config.max_preview_chars;
 
             return config;
         }
@@ -127,9 +118,8 @@
         function saveConfig() {
             const sources = Array.from(document.querySelectorAll('input[name="sources"]:checked')).map(cb => cb.value);
             const max_results = parseInt(document.getElementById('max_results').value) || 3;
-            const max_preview_chars = parseInt(document.getElementById('max_preview_chars').value) || 1024;
 
-            const config = { sources, max_results, max_preview_chars };
+            const config = { sources, max_results };
             localStorage.setItem(configKey, JSON.stringify(config));
             return config;
         }
@@ -300,7 +290,6 @@
                         query: query,
                         sources: config.sources,
                         max_results: config.max_results,
-                        max_preview_chars: config.max_preview_chars
                     }),
                     headers: { 'Content-Type': 'application/json' },
                 });

@@ -54,9 +54,12 @@ class GitHubSearch(BaseSearch):
             title = item.get("name", "")
             preview = item.get("description", "") or ""
             if preview:
-                if len(preview) > self.github_config.max_preview_chars:
-                    preview = preview[: self.github_config.max_preview_chars] + "..."
-                return SearchResult(url=url, title=title, preview=preview, source="github")
+                return SearchResult(
+                    url=url,
+                    title=title,
+                    preview=preview,
+                    source="github",
+                )
         except Exception:
             pass
         return None

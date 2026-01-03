@@ -54,8 +54,6 @@ class NewsAPISearch(BaseSearch):
             title = article.get("title", "")
             preview = article.get("description", "") or ""
             if preview:
-                if len(preview) > self.newsapi_config.max_preview_chars:
-                    preview = preview[: self.newsapi_config.max_preview_chars] + "..."
                 return SearchResult(url=url, title=title, preview=preview, source="newsapi")
         except Exception:
             pass

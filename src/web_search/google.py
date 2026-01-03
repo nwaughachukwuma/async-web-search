@@ -88,7 +88,7 @@ class GoogleSearch(BaseSearch):
         return SearchResult(
             url=url,
             title=item.get("title", ""),
-            preview=content[: self.google_config.max_preview_chars],
+            preview=content,
             source="google",
         )
 
