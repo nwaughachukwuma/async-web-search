@@ -97,6 +97,8 @@
     <script>
         const configKey = 'searchConfig';
         const collapsedKey = 'configCollapsed';
+        // Base classes to maintain consistent panel styling across all states
+        const basePanelClasses = 'bg-white p-4 rounded-lg shadow min-h-[160px]';
 
         function loadConfig() {
             const config = JSON.parse(localStorage.getItem(configKey)) || {
@@ -127,9 +129,12 @@
         function displayResults(results) {
             const div = document.getElementById('results');
             div.innerHTML = '';
-            div.className = 'flex flex-col space-y-6'; // Vertical layout with spacing
+            // Preserve the base panel and apply vertical layout for grouped results
+            div.className = `${basePanelClasses} flex flex-col space-y-6`;
 
             if (!results || (Array.isArray(results) && results.length === 0)) {
+                // Empty state – keep panel styling and center the message
+                div.className = `${basePanelClasses} flex items-center justify-center text-center`;
                 div.innerHTML = '<p class="text-gray-500">No results found.</p>';
                 return;
             }
@@ -281,8 +286,9 @@
 
             const config = saveConfig();
             const resultsDiv = document.getElementById('results');
+            // Loading state – keep panel styling and center spinner text
+            resultsDiv.className = `${basePanelClasses} flex items-center justify-center text-center`;
             resultsDiv.innerHTML = '<div class="flex items-center gap-3"><div class="w-6 h-6 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div><span class="text-gray-500">Searching...</span></div>';
-
             try {
                 const res = await fetch('/search', {
                     method: 'POST',
@@ -300,6 +306,8 @@
                 // Data may be { results: [...] } or a direct array
                 displayResults(data.results || data);
             } catch (err) {
+                // Error state – keep panel styling and center the error message
+                resultsDiv.className = `${basePanelClasses} flex items-center justify-center text-center`;
                 resultsDiv.innerHTML = `<p class="text-red-500">Error: ${err.message}</p>`;
             }
         });
