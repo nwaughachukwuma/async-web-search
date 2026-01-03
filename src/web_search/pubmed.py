@@ -42,15 +42,15 @@ class PubMedSearch(BaseSearch):
             search_response.raise_for_status()
             search_data = search_response.json()
 
-        idList = search_data.get("esearchresult", {}).get("idList", [])
-        if not idList:
+        idlist = search_data.get("esearchresult", {}).get("idlist", [])
+        if not idlist:
             return []
 
         # Then, get summaries
         ESUMMARY_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
         summary_params = {
             "db": "pubmed",
-            "id": ",".join(idList),
+            "id": ",".join(idlist),
             "retmode": "json",
         }
 
@@ -63,7 +63,7 @@ class PubMedSearch(BaseSearch):
 
         result = summary_data.get("result", {})
         sources: List[SearchResult] = []
-        for uid in idList:
+        for uid in idlist:
             article = result.get(uid)
             if article:
                 source = self._extract_search_result(article)

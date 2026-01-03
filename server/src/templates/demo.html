@@ -15,7 +15,7 @@
 </head>
 
 <body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
         <h1 class="text-3xl font-bold text-center mb-8">Async WebSearch Demo</h1>
 
         <details id="config-panel" open class="mb-6 bg-white p-4 rounded-lg shadow transition-all duration-300">
@@ -70,12 +70,6 @@
                         <input type="number" id="max_preview_chars" name="max_preview_chars" min="100"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2">
                     </div>
-
-                    <div>
-                        <label for="timeout" class="block text-sm font-medium text-gray-700">Timeout (s)</label>
-                        <input type="number" id="timeout" name="timeout" step="0.1"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2">
-                    </div>
                 </form>
             </div>
         </details>
@@ -115,8 +109,7 @@
             const config = JSON.parse(localStorage.getItem(configKey)) || {
                 sources: ['google'],
                 max_results: 3,
-                max_preview_chars: 1024,
-                timeout: null
+                max_preview_chars: 1024
             };
 
             // Set sources
@@ -127,7 +120,6 @@
             // Set other fields
             document.getElementById('max_results').value = config.max_results;
             document.getElementById('max_preview_chars').value = config.max_preview_chars;
-            document.getElementById('timeout').value = config.timeout || '';
 
             return config;
         }
@@ -136,9 +128,8 @@
             const sources = Array.from(document.querySelectorAll('input[name="sources"]:checked')).map(cb => cb.value);
             const max_results = parseInt(document.getElementById('max_results').value) || 3;
             const max_preview_chars = parseInt(document.getElementById('max_preview_chars').value) || 1024;
-            const timeout = document.getElementById('timeout').value ? parseFloat(document.getElementById('timeout').value) : null;
 
-            const config = { sources, max_results, max_preview_chars, timeout };
+            const config = { sources, max_results, max_preview_chars };
             localStorage.setItem(configKey, JSON.stringify(config));
             return config;
         }
@@ -146,6 +137,7 @@
         function displayResults(results) {
             const div = document.getElementById('results');
             div.innerHTML = '';
+            div.className = 'flex flex-col space-y-6'; // Vertical layout with spacing
 
             if (!results || (Array.isArray(results) && results.length === 0)) {
                 div.innerHTML = '<p class="text-gray-500">No results found.</p>';
@@ -158,36 +150,47 @@
                 return;
             }
 
-            // Expecting array of source results
+            // Expecting array of result objects (new JSON format)
             if (!Array.isArray(results)) {
                 div.innerHTML = '<p class="text-red-500">Error: Invalid results format received from server</p>';
                 console.error('Expected results to be an array, got:', results);
                 return;
             }
 
-            // Render each source block
-            results.forEach(sourceResult => {
+            // Group results by source
+            const groupedResults = {};
+            results.forEach(result => {
+                const source = result.source || 'unknown';
+                if (!groupedResults[source]) {
+                    groupedResults[source] = [];
+                }
+                groupedResults[source].push(result);
+            });
+
+            // Render each source block in order
+            Object.keys(groupedResults).forEach(sourceName => {
                 const sourceDiv = document.createElement('div');
-                sourceDiv.className = 'mb-4 text-left';
+                sourceDiv.className = 'flex flex-col space-y-3';
 
                 const h3 = document.createElement('h3');
                 h3.className = 'text-xl font-semibold mb-2';
-                h3.textContent = (sourceResult.source || '').charAt(0).toUpperCase() + (sourceResult.source || '').slice(1);
+                h3.textContent = sourceName.charAt(0).toUpperCase() + sourceName.slice(1);
                 sourceDiv.appendChild(h3);
 
-                if (Array.isArray(sourceResult.results) && sourceResult.results.length > 0) {
-                    sourceResult.results.forEach(result => {
+                const sourceResults = groupedResults[sourceName];
+                if (sourceResults.length > 0) {
+                    sourceResults.forEach(result => {
                         const resultDiv = document.createElement('div');
-                        resultDiv.className = 'mb-3 p-3 bg-gray-50 rounded';
+                        resultDiv.className = 'flex flex-col space-y-2 p-4 bg-gray-50 rounded-lg border border-gray-200';
 
                         const title = document.createElement('h4');
-                        title.className = 'font-medium text-blue-600';
+                        title.className = 'font-medium text-blue-600 text-lg';
                         title.textContent = result.title || 'Untitled';
                         resultDiv.appendChild(title);
 
                         if (result.preview) {
                             const snippet = document.createElement('p');
-                            snippet.className = 'text-sm text-gray-700 mt-1';
+                            snippet.className = 'text-sm text-gray-700 leading-relaxed';
                             snippet.textContent = result.preview;
                             resultDiv.appendChild(snippet);
                         }
@@ -196,7 +199,7 @@
                             const link = document.createElement('a');
                             link.href = result.url;
                             link.target = '_blank';
-                            link.className = 'text-xs text-blue-500 hover:underline block mt-2';
+                            link.className = 'text-xs text-blue-500 hover:underline mt-2 inline-block';
                             link.textContent = result.url;
                             resultDiv.appendChild(link);
                         }
@@ -205,7 +208,7 @@
                     });
                 } else {
                     const noResults = document.createElement('p');
-                    noResults.className = 'text-gray-500';
+                    noResults.className = 'text-gray-500 italic';
                     noResults.textContent = 'No results from this source.';
                     sourceDiv.appendChild(noResults);
                 }
@@ -297,8 +300,7 @@
                         query: query,
                         sources: config.sources,
                         max_results: config.max_results,
-                        max_preview_chars: config.max_preview_chars,
-                        timeout: config.timeout
+                        max_preview_chars: config.max_preview_chars
                     }),
                     headers: { 'Content-Type': 'application/json' },
                 });
