@@ -1,13 +1,13 @@
 # Web Search
 
-Async web search library supporting Google Custom Search, Wikipedia, and arXiv APIs.
+Async web search library supporting Google Custom Search, Wikipedia, arXiv, NewsAPI, GitHub, and PubMed APIs.
 
 > You can search across multiple sources and retrieve relevant, clean, and formatted results efficiently.
 
 ## 🌟 Features
 
 - ⚡ Asynchronous Searching: Perform searches concurrently across multiple sources
-- 🔗 Multi-Source Support: Query Google Custom Search, Wikipedia, and arXiv
+- 🔗 Multi-Source Support: Query Google Custom Search, Wikipedia, arXiv, NewsAPI, GitHub, and PubMed
 - 🧹 Content extraction and cleaning
 - 🔧 Configurable Search Parameters: Adjust maximum results, preview length, and sources.
 
@@ -16,14 +16,18 @@ Async web search library supporting Google Custom Search, Wikipedia, and arXiv A
 - 🐍 Python 3.8 or newer
 - 🔑 API keys and configuration:
   - Google Search: Requires a Google API key and a Custom Search Engine (CSE) ID.
+  - NewsAPI: Requires a free API key from newsapi.org.
   - arXiv: No API key required.
   - Wikipedia: No API key required.
+  - GitHub: No API key required.
+  - PubMed: No API key required.
 
-Set environment variables for Google API:
+Set environment variables:
 
 ```bash
 export GOOGLE_API_KEY="your_google_api_key"
 export CSE_ID="your_cse_id"
+export NEWSAPI_KEY="your_newsapi_key"
 ```
 
 ## 📦 Installation
@@ -39,7 +43,7 @@ pip install async-web-search
 ```python
 from web_search import WebSearch, WebSearchConfig
 
-config = WebSearchConfig(sources=["google", "arxiv"])
+config = WebSearchConfig(sources=["google", "arxiv", "github", "newsapi", "pubmed"])
 results = await WebSearch(config).search("quantum computing")
 
 print(results)
