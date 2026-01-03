@@ -76,10 +76,12 @@ async def search(request: SearchRequest):
     )
 
     # Perform search
-    web_search = WebSearch(config)
-    results = await web_search.search(request.query)
-
-    return {"results": results}
+    try:
+        web_search = WebSearch(config)
+        results = await web_search.search(request.query)
+        return {"results": results}
+    except Exception as e:
+        raise HTTPException(500, f"Internal server error: {str(e)}")
 
 
 if __name__ == "__main__":
