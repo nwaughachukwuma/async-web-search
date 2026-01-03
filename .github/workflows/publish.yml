@@ -14,7 +14,7 @@ on:
 env:
   GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
   CSE_ID: ${{ secrets.CSE_ID }}
-  NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+  NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

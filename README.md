@@ -92,6 +92,12 @@ for result in results:
     print(result)
 ```
 
+## 🌐 Production API Server
+
+A FastAPI-based production server is available for teams that want to use async web search as a web service. The server is hosted at **https://awebs.veedo.ai** and can be run locally as well.
+
+See [`server/README.md`](server/README.md) for detailed API documentation, endpoints, and deployment instructions.
+
 ## 📘 API Overview
 
 ### 🔧 Configuration

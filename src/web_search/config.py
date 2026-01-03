@@ -21,7 +21,7 @@ class GoogleSearchConfig(BaseConfig):
 
 @dataclass
 class NewsAPISearchConfig(BaseConfig):
-    api_key: str = field(default_factory=lambda: os.environ.get("NEWSAPI_KEY", ""))
+    api_key: str = field(default_factory=lambda: os.environ.get("NEWS_API_KEY", ""))
 
 
 @dataclass
