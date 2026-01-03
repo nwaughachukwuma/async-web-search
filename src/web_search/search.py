@@ -11,6 +11,8 @@ from .wikipedia_ import WikipediaSearch
 
 
 class WebSearch:
+    config: WebSearchConfig
+
     def __init__(self, config: WebSearchConfig | None = None):
         self.config = config if config else WebSearchConfig()
 

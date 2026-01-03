@@ -22,8 +22,6 @@ async def test_search_successful_request(client):
         "sources": ["google"],
         "max_results": 2,
         "max_preview_chars": 500,
-        "google_api_key": "test_key",
-        "cse_id": "test_cse",
     }
 
     # Mock the WebSearch class
@@ -46,39 +44,44 @@ async def test_search_successful_request(client):
 
 
 @pytest.mark.asyncio
-async def test_search_missing_google_keys(client):
-    """Test search request fails when google keys are missing"""
+async def test_search_missing_google_keys(client, monkeypatch):
+    """Test search request fails when Google API keys are missing from environment"""
     payload = {
         "query": "test query",
         "sources": ["google"],
         "max_results": 2,
-        # Missing google_api_key and cse_id
     }
+
+    # Mock missing environment variables
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.delenv("CSE_ID", raising=False)
 
     response = client.post("/search", json=payload)
 
-    assert response.status_code == 400
+    assert response.status_code == 500
     data = response.json()
     assert "detail" in data
-    assert "google_api_key and cse_id are required" in data["detail"]
+    assert "Google API configuration missing" in data["detail"]
 
 
 @pytest.mark.asyncio
-async def test_search_missing_newsapi_key(client):
-    """Test search request fails when newsapi key is missing"""
+async def test_search_missing_newsapi_key(client, monkeypatch):
+    """Test search request fails when NewsAPI key is missing from environment"""
     payload = {
         "query": "test query",
         "sources": ["newsapi"],
         "max_results": 2,
-        # Missing newsapi_key
     }
+
+    # Mock missing environment variable
+    monkeypatch.delenv("NEWS_API_KEY", raising=False)
 
     response = client.post("/search", json=payload)
 
-    assert response.status_code == 400
+    assert response.status_code == 500
     data = response.json()
     assert "detail" in data
-    assert "newsapi_key is required" in data["detail"]
+    assert "NewsAPI configuration missing" in data["detail"]
 
 
 @pytest.mark.asyncio
@@ -88,8 +91,6 @@ async def test_search_multiple_sources(client):
         "query": "test query",
         "sources": ["google", "arxiv", "github"],
         "max_results": 3,
-        "google_api_key": "test_key",
-        "cse_id": "test_cse",
     }
 
     with patch("server.index.WebSearch") as mock_websearch_class:
@@ -110,8 +111,6 @@ async def test_search_internal_error(client):
     payload = {
         "query": "test query",
         "sources": ["google"],
-        "google_api_key": "test_key",
-        "cse_id": "test_cse",
     }
 
     with patch("server.index.WebSearch") as mock_websearch_class:

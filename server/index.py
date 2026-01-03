@@ -1,9 +1,12 @@
+import os
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from web_search import BaseConfig, GoogleSearchConfig, NewsAPISearchConfig, SearchSources, WebSearch, WebSearchConfig
+
+from .utils import validate_api_keys
 
 app = FastAPI(title="Async WebSearch Demo", description="Production-scale async web search API")
 
@@ -14,10 +17,6 @@ class SearchRequest(BaseModel):
     max_results: int = 3
     max_preview_chars: int = 1024
     timeout: Optional[float] = None
-    google_api_key: Optional[str] = None
-    cse_id: Optional[str] = None
-    app_domain: Optional[str] = None
-    newsapi_key: Optional[str] = None
 
 
 @app.get("/")
@@ -38,39 +37,43 @@ async def search(request: SearchRequest):
     - **max_results**: Maximum results per source (default: 3)
     - **max_preview_chars**: Maximum characters in preview (default: 1024)
     - **timeout**: Request timeout in seconds (optional)
-    - **google_api_key**: Google API key (required if using google source)
-    - **cse_id**: Google Custom Search Engine ID (required if using google source)
-    - **app_domain**: Google app domain (optional)
-    - **newsapi_key**: NewsAPI key (required if using newsapi source)
     """
+    validate_api_keys(request.sources)
+
     # Build configs
     base_config = BaseConfig(
-        max_results=request.max_results, max_preview_chars=request.max_preview_chars, timeout=request.timeout
+        max_results=request.max_results,
+        max_preview_chars=request.max_preview_chars,
+        timeout=request.timeout,
     )
 
-    google_config = None
+    google_config: GoogleSearchConfig | None = None
     if "google" in request.sources:
-        if not request.google_api_key or not request.cse_id:
-            raise HTTPException(
-                status_code=400, detail="google_api_key and cse_id are required when using google source"
-            )
         google_config = GoogleSearchConfig(
-            api_key=request.google_api_key, cse_id=request.cse_id, app_domain=request.app_domain
+            api_key=os.environ["GOOGLE_API_KEY"],
+            cse_id=os.environ["CSE_ID"],
+            app_domain=os.environ.get("GOOGLE_APP_DOMAIN"),
+            max_preview_chars=base_config.max_preview_chars,
+            max_results=base_config.max_results,
+            timeout=base_config.timeout,
         )
 
-    newsapi_config = None
+    newsapi_config: NewsAPISearchConfig | None = None
     if "newsapi" in request.sources:
-        if not request.newsapi_key:
-            raise HTTPException(status_code=400, detail="newsapi_key is required when using newsapi source")
-        newsapi_config = NewsAPISearchConfig(api_key=request.newsapi_key)
+        newsapi_config = NewsAPISearchConfig(
+            api_key=os.environ["NEWS_API_KEY"],
+            max_preview_chars=base_config.max_preview_chars,
+            max_results=base_config.max_results,
+            timeout=base_config.timeout,
+        )
 
     # Create WebSearch config
     config = WebSearchConfig(
         sources=request.sources,
         google_config=google_config,
+        newsapi_config=newsapi_config,
         wiki_config=base_config,
         arxiv_config=base_config,
-        newsapi_config=newsapi_config,
         github_config=base_config,
         pubmed_config=base_config,
     )

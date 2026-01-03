@@ -14,11 +14,7 @@ A FastAPI-based production server is available at **https://awebs.veedo.ai** for
   "sources": ["google", "arxiv", "github"],
   "max_results": 3,
   "max_preview_chars": 1024,
-  "timeout": 10.0,
-  "google_api_key": "your_google_api_key",
-  "cse_id": "your_cse_id",
-  "app_domain": "your_domain.com",
-  "newsapi_key": "your_newsapi_key"
+  "timeout": 10.0
 }
 ```
 
@@ -35,8 +31,14 @@ A FastAPI-based production server is available at **https://awebs.veedo.ai** for
 To run the server locally:
 
 ```bash
+# Install dependencies
 pip install -r requirements.txt
-python server.py
+
+# Set environment variables (copy from .env.example and fill in your actual API keys)
+cp .env.example .env
+
+# Run the server
+python index.py
 ```
 
 The server will be available at `http://localhost:8000` with interactive docs at `http://localhost:8000/docs`.
