@@ -24,28 +24,6 @@ class WebSearch:
         self.github = GitHubSearch(github_config=self.config.github_config)
         self.pubmed = PubMedSearch(pubmed_config=self.config.pubmed_config)
 
-    async def compile_search(self, query: str):
-        """
-        Search the web for relevant content
-        """
-        tasks: List[Coroutine[Any, Any, str]] = []
-
-        if "google" in self.config.sources:
-            tasks.append(self.google._compile(query))
-        if "wikipedia" in self.config.sources:
-            tasks.append(self.wikipedia._compile(query))
-        if "arxiv" in self.config.sources:
-            tasks.append(self.arxiv._compile(query))
-        if "newsapi" in self.config.sources:
-            tasks.append(self.newsapi._compile(query))
-        if "github" in self.config.sources:
-            tasks.append(self.github._compile(query))
-        if "pubmed" in self.config.sources:
-            tasks.append(self.pubmed._compile(query))
-
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        return "\n\n".join(r for r in results if isinstance(r, str))
-
     async def search(self, query: str) -> List[SearchResult]:
         """
         Search the web for relevant content and return structured results
@@ -67,3 +45,25 @@ class WebSearch:
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
         return [item for r in results if not isinstance(r, BaseException) for item in r]
+
+    async def compile_search(self, query: str):
+        """
+        Search the web for relevant content
+        """
+        tasks: List[Coroutine[Any, Any, str]] = []
+
+        if "google" in self.config.sources:
+            tasks.append(self.google._compile(query))
+        if "wikipedia" in self.config.sources:
+            tasks.append(self.wikipedia._compile(query))
+        if "arxiv" in self.config.sources:
+            tasks.append(self.arxiv._compile(query))
+        if "newsapi" in self.config.sources:
+            tasks.append(self.newsapi._compile(query))
+        if "github" in self.config.sources:
+            tasks.append(self.github._compile(query))
+        if "pubmed" in self.config.sources:
+            tasks.append(self.pubmed._compile(query))
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        return "\n\n".join(r for r in results if isinstance(r, str))
