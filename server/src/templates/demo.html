@@ -6,73 +6,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Async WebSearch Demo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* rotate chevron when details open */
+        details[open] summary svg {
+            transform: rotate(180deg);
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <h1 class="text-3xl font-bold text-center mb-8">Async WebSearch Demo</h1>
 
-        <details id="config-panel" open class="mb-6 bg-white p-4 rounded-lg shadow">
-            <summary class="cursor-pointer text-lg font-semibold">Search Configuration</summary>
-            <form id="config-form" class="mt-4 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Sources</label>
-                    <div class="mt-2 space-y-2">
-                        <label class="inline-flex items-center mr-4">
-                            <input type="checkbox" name="sources" value="google" class="rounded">
-                            <span class="ml-2">Google</span>
-                        </label>
-                        <label class="inline-flex items-center mr-4">
-                            <input type="checkbox" name="sources" value="wikipedia" class="rounded">
-                            <span class="ml-2">Wikipedia</span>
-                        </label>
-                        <label class="inline-flex items-center mr-4">
-                            <input type="checkbox" name="sources" value="arxiv" class="rounded">
-                            <span class="ml-2">ArXiv</span>
-                        </label>
-                        <label class="inline-flex items-center mr-4">
-                            <input type="checkbox" name="sources" value="newsapi" class="rounded">
-                            <span class="ml-2">NewsAPI</span>
-                        </label>
-                        <label class="inline-flex items-center mr-4">
-                            <input type="checkbox" name="sources" value="github" class="rounded">
-                            <span class="ml-2">GitHub</span>
-                        </label>
-                        <label class="inline-flex items-center mr-4">
-                            <input type="checkbox" name="sources" value="pubmed" class="rounded">
-                            <span class="ml-2">PubMed</span>
-                        </label>
+        <details id="config-panel" open class="mb-6 bg-white p-4 rounded-lg shadow transition-all duration-300">
+            <summary class="cursor-pointer text-lg font-semibold flex items-center justify-between">
+                <span>Search Configuration</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 transition-transform duration-150"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </summary>
+
+            <div class="details-panel overflow-hidden transition-[max-height] duration-300 ease-in-out">
+                <form id="config-form" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Sources</label>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <input class="sr-only" id="src-google" type="checkbox" name="sources" value="google">
+                            <label for="src-google"
+                                class="cursor-pointer inline-flex items-center px-3 py-1.5 rounded-md border text-sm">Google</label>
+
+                            <input class="sr-only" id="src-wikipedia" type="checkbox" name="sources" value="wikipedia">
+                            <label for="src-wikipedia"
+                                class="cursor-pointer inline-flex items-center px-3 py-1.5 rounded-md border text-sm">Wikipedia</label>
+
+                            <input class="sr-only" id="src-arxiv" type="checkbox" name="sources" value="arxiv">
+                            <label for="src-arxiv"
+                                class="cursor-pointer inline-flex items-center px-3 py-1.5 rounded-md border text-sm">ArXiv</label>
+
+                            <input class="sr-only" id="src-newsapi" type="checkbox" name="sources" value="newsapi">
+                            <label for="src-newsapi"
+                                class="cursor-pointer inline-flex items-center px-3 py-1.5 rounded-md border text-sm">NewsAPI</label>
+
+                            <input class="sr-only" id="src-github" type="checkbox" name="sources" value="github">
+                            <label for="src-github"
+                                class="cursor-pointer inline-flex items-center px-3 py-1.5 rounded-md border text-sm">GitHub</label>
+
+                            <input class="sr-only" id="src-pubmed" type="checkbox" name="sources" value="pubmed">
+                            <label for="src-pubmed"
+                                class="cursor-pointer inline-flex items-center px-3 py-1.5 rounded-md border text-sm">PubMed</label>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <label for="max_results" class="block text-sm font-medium text-gray-700">Max Results</label>
-                    <input type="number" id="max_results" name="max_results" min="1" max="10"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                </div>
-                <div>
-                    <label for="max_preview_chars" class="block text-sm font-medium text-gray-700">Max Preview
-                        Chars</label>
-                    <input type="number" id="max_preview_chars" name="max_preview_chars" min="100"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                </div>
-                <div>
-                    <label for="timeout" class="block text-sm font-medium text-gray-700">Timeout (seconds)</label>
-                    <input type="number" id="timeout" name="timeout" step="0.1"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                </div>
-            </form>
+
+                    <div>
+                        <label for="max_results" class="block text-sm font-medium text-gray-700">Max Results</label>
+                        <input type="number" id="max_results" name="max_results" min="1" max="10"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2">
+                    </div>
+
+                    <div>
+                        <label for="max_preview_chars" class="block text-sm font-medium text-gray-700">Max Preview
+                            Chars</label>
+                        <input type="number" id="max_preview_chars" name="max_preview_chars" min="100"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2">
+                    </div>
+
+                    <div>
+                        <label for="timeout" class="block text-sm font-medium text-gray-700">Timeout (s)</label>
+                        <input type="number" id="timeout" name="timeout" step="0.1"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm px-3 py-2">
+                    </div>
+                </form>
+            </div>
         </details>
 
         <form id="search-form" class="mb-6">
-            <div class="flex">
-                <input type="text" id="query" name="query" placeholder="Enter your search query"
-                    class="flex-1 rounded-l-md border-gray-300 shadow-sm px-3 py-2" required>
+            <div class="flex items-center gap-2">
+                <div class="relative flex-1">
+                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                        xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                    </svg>
+                    <input type="text" id="query" name="query"
+                        placeholder="Search the web — try ‘python async requests’"
+                        class="w-full rounded-md border border-gray-300 shadow-sm px-10 py-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        required>
+                    <button type="button" id="clear-query" title="Clear"
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden">✕</button>
+                </div>
                 <button type="submit"
-                    class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600">Search</button>
+                    class="bg-blue-600 text-white px-5 py-3 rounded-md hover:bg-blue-700 shadow">Search</button>
             </div>
         </form>
 
-        <div id="results" class="bg-white p-4 rounded-lg shadow"></div>
+        <div id="results"
+            class="bg-white p-4 rounded-lg shadow min-h-[160px] flex items-center justify-center text-center">
+            <p id="results-message" class="text-gray-500">Your results will appear here.</p>
+        </div>
     </div>
 
     <script>
@@ -115,54 +147,56 @@
             const div = document.getElementById('results');
             div.innerHTML = '';
 
-            if (typeof results === 'string') {
-                if (results) div.innerHTML = results
-                else {
-                    div.innerHTML = '<p class="text-gray-500">No results found.</p>';
-                }
+            if (!results || (Array.isArray(results) && results.length === 0)) {
+                div.innerHTML = '<p class="text-gray-500">No results found.</p>';
                 return;
             }
 
+            // If we received a flat string or HTML
+            if (typeof results === 'string') {
+                div.innerHTML = results;
+                return;
+            }
+
+            // Expecting array of source results
             if (!Array.isArray(results)) {
                 div.innerHTML = '<p class="text-red-500">Error: Invalid results format received from server</p>';
                 console.error('Expected results to be an array, got:', results);
                 return;
             }
 
-            if (!results || results.length === 0) {
-                div.innerHTML = '<p class="text-gray-500">No results found.</p>';
-                return;
-            }
-
+            // Render each source block
             results.forEach(sourceResult => {
                 const sourceDiv = document.createElement('div');
-                sourceDiv.className = 'mb-4';
+                sourceDiv.className = 'mb-4 text-left';
 
                 const h3 = document.createElement('h3');
                 h3.className = 'text-xl font-semibold mb-2';
-                h3.textContent = sourceResult.source.charAt(0).toUpperCase() + sourceResult.source.slice(1);
+                h3.textContent = (sourceResult.source || '').charAt(0).toUpperCase() + (sourceResult.source || '').slice(1);
                 sourceDiv.appendChild(h3);
 
-                if (sourceResult.results && sourceResult.results.length > 0) {
+                if (Array.isArray(sourceResult.results) && sourceResult.results.length > 0) {
                     sourceResult.results.forEach(result => {
                         const resultDiv = document.createElement('div');
                         resultDiv.className = 'mb-3 p-3 bg-gray-50 rounded';
 
                         const title = document.createElement('h4');
                         title.className = 'font-medium text-blue-600';
-                        title.textContent = result.title;
+                        title.textContent = result.title || 'Untitled';
                         resultDiv.appendChild(title);
 
-                        const snippet = document.createElement('p');
-                        snippet.className = 'text-sm text-gray-700 mt-1';
-                        snippet.textContent = result.preview;
-                        resultDiv.appendChild(snippet);
+                        if (result.preview) {
+                            const snippet = document.createElement('p');
+                            snippet.className = 'text-sm text-gray-700 mt-1';
+                            snippet.textContent = result.preview;
+                            resultDiv.appendChild(snippet);
+                        }
 
                         if (result.url) {
                             const link = document.createElement('a');
                             link.href = result.url;
                             link.target = '_blank';
-                            link.className = 'text-xs text-blue-500 hover:underline';
+                            link.className = 'text-xs text-blue-500 hover:underline block mt-2';
                             link.textContent = result.url;
                             resultDiv.appendChild(link);
                         }
@@ -180,21 +214,71 @@
             });
         }
 
-        // Load initial config
-        loadConfig();
+        // Load initial config and UI state
+        const initialConfig = loadConfig();
 
-        // Load collapsed state
+        // Source chips: ensure labels reflect checkbox state and keep behavior reliable
+        function updateSourceChips() {
+            document.querySelectorAll('input[name="sources"]').forEach(cb => {
+                const label = document.querySelector(`label[for="${cb.id}"]`);
+                if (!label) return;
+                if (cb.checked) {
+                    label.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                } else {
+                    label.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                }
+            });
+        }
+
+        // Attach listeners to source inputs
+        document.querySelectorAll('input[name="sources"]').forEach(cb => cb.addEventListener('change', () => { updateSourceChips(); saveConfig(); }));
+
+        // Load collapsed state and animate the details panel height
+        const detailsEl = document.getElementById('config-panel');
+        const detailsContent = detailsEl.querySelector('.details-panel');
         const collapsed = localStorage.getItem(collapsedKey) === 'true';
-        document.getElementById('config-panel').open = !collapsed;
+        detailsEl.open = !collapsed;
 
-        // Save collapsed state on toggle
-        document.getElementById('config-panel').addEventListener('toggle', function () {
+        function setDetailsMaxHeight() {
+            if (!detailsContent) return;
+            if (detailsEl.open) {
+                // set to scrollHeight to animate open
+                detailsContent.style.maxHeight = detailsContent.scrollHeight + 'px';
+            } else {
+                detailsContent.style.maxHeight = '0px';
+            }
+        }
+
+        // Ensure correct height on init
+        setTimeout(() => { updateSourceChips(); setDetailsMaxHeight(); }, 20);
+
+        // Persist collapsed state and animate on toggle
+        detailsEl.addEventListener('toggle', function () {
             localStorage.setItem(collapsedKey, !this.open);
+            // animate
+            setDetailsMaxHeight();
         });
 
-        // Save config on change
+        // Recalculate height if window resizes while open
+        window.addEventListener('resize', () => { if (detailsEl.open) setDetailsMaxHeight(); });
+
+        // Wire config save handlers for other inputs
         document.getElementById('config-form').addEventListener('change', saveConfig);
         document.getElementById('config-form').addEventListener('input', saveConfig);
+
+        // Show initial results message
+        const resultsMessage = document.getElementById('results-message');
+        if (resultsMessage) resultsMessage.textContent = 'Your results will appear here.';
+
+        // Clear button for query
+        const clearBtn = document.getElementById('clear-query');
+        const queryInput = document.getElementById('query');
+        function refreshClearBtn() {
+            if (queryInput.value.trim()) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
+        }
+        queryInput.addEventListener('input', refreshClearBtn);
+        clearBtn.addEventListener('click', () => { queryInput.value = ''; refreshClearBtn(); queryInput.focus(); });
 
         // Handle search
         document.getElementById('search-form').addEventListener('submit', async function (e) {
@@ -203,28 +287,30 @@
             if (!query) return;
 
             const config = saveConfig();
-            document.getElementById('results').innerHTML = '<p class="text-gray-500">Searching...</p>';
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="flex items-center gap-3"><div class="w-6 h-6 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div><span class="text-gray-500">Searching...</span></div>';
 
-            const response = await fetch('/search', {
-                method: 'POST',
-                body: JSON.stringify({
-                    query: query,
-                    sources: config.sources,
-                    max_results: config.max_results,
-                    max_preview_chars: config.max_preview_chars,
-                    timeout: config.timeout
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-            }).then((res) => {
-                if (res.ok) return res.json()
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }).catch((err) => {
-                document.getElementById('results').innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
-            })
+            try {
+                const res = await fetch('/search', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        query: query,
+                        sources: config.sources,
+                        max_results: config.max_results,
+                        max_preview_chars: config.max_preview_chars,
+                        timeout: config.timeout
+                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                });
 
-            displayResults(response.results);
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                const data = await res.json();
+
+                // Data may be { results: [...] } or a direct array
+                displayResults(data.results || data);
+            } catch (err) {
+                resultsDiv.innerHTML = `<p class="text-red-500">Error: ${err.message}</p>`;
+            }
         });
     </script>
 </body>
