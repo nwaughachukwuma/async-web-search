@@ -1,6 +1,6 @@
 import os
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Literal, List
 
 SearchSources = Literal["google", "wikipedia", "arxiv", "newsapi", "github", "pubmed"]
 
@@ -26,7 +26,7 @@ class NewsAPISearchConfig(BaseConfig):
 
 @dataclass
 class WebSearchConfig:
-    sources: list[SearchSources] = field(default_factory=lambda: ["google"])
+    sources: List[SearchSources] = field(default_factory=lambda: ["google"])
     google_config: GoogleSearchConfig | None = None
     wiki_config: BaseConfig | None = None
     arxiv_config: BaseConfig | None = None

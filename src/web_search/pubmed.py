@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 import httpx
 
 from .base import BaseSearch, SearchResult
@@ -10,11 +12,14 @@ class PubMedSearch(BaseSearch):
     def __init__(self, pubmed_config: BaseConfig | None = None):
         self.pubmed_config = pubmed_config if pubmed_config else BaseConfig()
 
+    async def _handle(self, query: str) -> List[SearchResult]:
+        return await self._search(query)
+
     async def _compile(self, query: str) -> str:
         results = await self._search(query)
         return "\n\n".join(str(r) for r in results)
 
-    async def _search(self, query: str) -> list[SearchResult]:
+    async def _search(self, query: str) -> List[SearchResult]:
         """
         Search PubMed articles
         """
@@ -37,15 +42,15 @@ class PubMedSearch(BaseSearch):
             search_response.raise_for_status()
             search_data = search_response.json()
 
-        idlist = search_data.get("esearchresult", {}).get("idlist", [])
-        if not idlist:
+        idList = search_data.get("esearchresult", {}).get("idList", [])
+        if not idList:
             return []
 
         # Then, get summaries
         ESUMMARY_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
         summary_params = {
             "db": "pubmed",
-            "id": ",".join(idlist),
+            "id": ",".join(idList),
             "retmode": "json",
         }
 
@@ -57,8 +62,8 @@ class PubMedSearch(BaseSearch):
             summary_data = summary_response.json()
 
         result = summary_data.get("result", {})
-        sources: list[SearchResult] = []
-        for uid in idlist:
+        sources: List[SearchResult] = []
+        for uid in idList:
             article = result.get(uid)
             if article:
                 source = self._extract_search_result(article)
@@ -67,7 +72,7 @@ class PubMedSearch(BaseSearch):
 
         return sources
 
-    def _extract_search_result(self, article: dict):
+    def _extract_search_result(self, article: Dict):
         try:
             uid = article.get("uid", "")
             url = f"https://pubmed.ncbi.nlm.nih.gov/{uid}/"
@@ -77,7 +82,7 @@ class PubMedSearch(BaseSearch):
             if preview:
                 if len(preview) > self.pubmed_config.max_preview_chars:
                     preview = preview[: self.pubmed_config.max_preview_chars] + "..."
-                return SearchResult(url=url, title=title, preview=preview)
+                return SearchResult(url=url, title=title, preview=preview, source="pubmed")
         except Exception:
             pass
         return None

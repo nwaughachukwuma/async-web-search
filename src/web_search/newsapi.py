@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 import httpx
 
 from .base import BaseSearch, SearchResult
@@ -10,11 +12,14 @@ class NewsAPISearch(BaseSearch):
     def __init__(self, newsapi_config: NewsAPISearchConfig | None = None):
         self.newsapi_config = newsapi_config if newsapi_config else NewsAPISearchConfig()
 
+    async def _handle(self, query: str) -> List[SearchResult]:
+        return await self._search(query)
+
     async def _compile(self, query: str) -> str:
         results = await self._search(query)
         return "\n\n".join(str(r) for r in results)
 
-    async def _search(self, query: str) -> list[SearchResult]:
+    async def _search(self, query: str) -> List[SearchResult]:
         """
         Search news articles using NewsAPI
         """
@@ -35,7 +40,7 @@ class NewsAPISearch(BaseSearch):
             data = response.json()
 
         articles = data.get("articles", [])
-        sources: list[SearchResult] = []
+        sources: List[SearchResult] = []
         for article in articles:
             source = self._extract_search_result(article)
             if source:
@@ -43,7 +48,7 @@ class NewsAPISearch(BaseSearch):
 
         return sources
 
-    def _extract_search_result(self, article: dict):
+    def _extract_search_result(self, article: Dict):
         try:
             url = article.get("url", "")
             title = article.get("title", "")
@@ -51,7 +56,7 @@ class NewsAPISearch(BaseSearch):
             if preview:
                 if len(preview) > self.newsapi_config.max_preview_chars:
                     preview = preview[: self.newsapi_config.max_preview_chars] + "..."
-                return SearchResult(url=url, title=title, preview=preview)
+                return SearchResult(url=url, title=title, preview=preview, source="newsapi")
         except Exception:
             pass
         return None
