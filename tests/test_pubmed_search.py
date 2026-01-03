@@ -29,4 +29,4 @@ def search_instance(mock_search_handler, sample_results):
 
 class TestPubMedSearch(BaseSearchTests):
     search_class = PubMedSearch
-    query = "diabetes mellitus"
+    query = "cancer immunotherapy"
