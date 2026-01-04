@@ -1,8 +1,9 @@
 async-web-search
 fastapi
+granian
 httpx
 pydantic
 pytest
 pytest-asyncio
 python-dotenv
-uvicorn[standard]
+uvloop
