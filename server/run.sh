@@ -2,11 +2,10 @@
 
 PORT=${PORT:-3131}
 THREADS=${THREADS:-8}
+WORKERS=${WORKERS:-4}
 
 # Calculate default workers if WORKERS not set
-if [ -z "$WORKERS" ]; then
-    WORKERS=$(($(nproc) * 2 + 1))
-fi
+echo "Starting server on port $PORT with $WORKERS workers and $THREADS threads per worker"
 
 source .venv/bin/activate
 
