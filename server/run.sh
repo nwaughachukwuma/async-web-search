@@ -8,7 +8,9 @@ if [ -z "$WORKERS" ]; then
     WORKERS=$(($(nproc) * 2 + 1))
 fi
 
-exec granian --interface asgi src/main:app \
+source .venv/bin/activate
+
+exec granian --interface asgi src/index:app \
     --host 0.0.0.0 \
     --port "$PORT" \
     --workers "$WORKERS" \
