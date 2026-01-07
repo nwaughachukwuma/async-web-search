@@ -17,9 +17,6 @@ class GoogleSearch(BaseSearch):
     def __init__(self, google_config: GoogleSearchConfig | None = None):
         self.google_config = google_config if google_config else GoogleSearchConfig()
 
-    async def _handle(self, query: str) -> List[SearchResult]:
-        return await self._search(query)
-
     async def _compile(self, query: str):
         results = await self._search(query)
         return "\n\n".join(str(r) for r in results if r.preview)

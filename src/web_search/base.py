@@ -24,10 +24,6 @@ class SearchResult:
 
 
 class BaseSearch:
-    def _handle(self, _query: str):
-        """main search handler with json response"""
-        pass
-
     def _compile(self, _query: str):
         """search and compile the result into a string"""
         pass

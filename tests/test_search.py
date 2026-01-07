@@ -121,35 +121,35 @@ async def test_websearch_search_returns_json():
         search = WebSearch(config)
         search.config = config
         search.google = AsyncMock()
-        search.google._handle = AsyncMock(
+        search.google._search = AsyncMock(
             return_value=[
                 SearchResult(url="https://google.com/1", title="Google Result 1", preview="Preview 1", source="google")
             ]
         )
         search.arxiv = AsyncMock()
-        search.arxiv._handle = AsyncMock(
+        search.arxiv._search = AsyncMock(
             return_value=[
                 SearchResult(url="https://arxiv.com/1", title="ArXiv Result 1", preview="Preview 2", source="arxiv")
             ]
         )
         search.wikipedia = AsyncMock()
-        search.wikipedia._handle = AsyncMock(return_value=[])
+        search.wikipedia._search = AsyncMock(return_value=[])
         search.github = AsyncMock()
-        search.github._handle = AsyncMock(return_value=[])
+        search.github._search = AsyncMock(return_value=[])
         search.newsapi = AsyncMock()
-        search.newsapi._handle = AsyncMock(return_value=[])
+        search.newsapi._search = AsyncMock(return_value=[])
         search.pubmed = AsyncMock()
-        search.pubmed._handle = AsyncMock(return_value=[])
+        search.pubmed._search = AsyncMock(return_value=[])
 
         result = await search.search("test query")
 
         # Check that only specified sources were called
-        search.google._handle.assert_called_once_with("test query")
-        search.arxiv._handle.assert_called_once_with("test query")
-        search.wikipedia._handle.assert_not_called()
-        search.github._handle.assert_not_called()
-        search.newsapi._handle.assert_not_called()
-        search.pubmed._handle.assert_not_called()
+        search.google._search.assert_called_once_with("test query")
+        search.arxiv._search.assert_called_once_with("test query")
+        search.wikipedia._search.assert_not_called()
+        search.github._search.assert_not_called()
+        search.newsapi._search.assert_not_called()
+        search.pubmed._search.assert_not_called()
 
         # Check the result is a list of dicts
         assert isinstance(result, list)
@@ -179,13 +179,13 @@ async def test_websearch_search_handles_exceptions():
         search = WebSearch(config)
         search.config = config
         search.google = AsyncMock()
-        search.google._handle = AsyncMock(
+        search.google._search = AsyncMock(
             return_value=[
                 SearchResult(url="https://google.com/1", title="Google Result", preview="Preview", source="google")
             ]
         )
         search.arxiv = AsyncMock()
-        search.arxiv._handle = AsyncMock(side_effect=Exception("API Error"))
+        search.arxiv._search = AsyncMock(side_effect=Exception("API Error"))
         search.wikipedia = AsyncMock()
         search.github = AsyncMock()
         search.newsapi = AsyncMock()

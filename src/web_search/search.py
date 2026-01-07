@@ -31,17 +31,17 @@ class WebSearch:
         tasks: List[Coroutine[Any, Any, List[SearchResult]]] = []
 
         if "google" in self.config.sources:
-            tasks.append(self.google._handle(query))
+            tasks.append(self.google._search(query))
         if "wikipedia" in self.config.sources:
-            tasks.append(self.wikipedia._handle(query))
+            tasks.append(self.wikipedia._search(query))
         if "arxiv" in self.config.sources:
-            tasks.append(self.arxiv._handle(query))
+            tasks.append(self.arxiv._search(query))
         if "newsapi" in self.config.sources:
-            tasks.append(self.newsapi._handle(query))
+            tasks.append(self.newsapi._search(query))
         if "github" in self.config.sources:
-            tasks.append(self.github._handle(query))
+            tasks.append(self.github._search(query))
         if "pubmed" in self.config.sources:
-            tasks.append(self.pubmed._handle(query))
+            tasks.append(self.pubmed._search(query))
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
         return [item.to_dict() for r in results if not isinstance(r, BaseException) for item in r]

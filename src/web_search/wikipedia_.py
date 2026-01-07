@@ -12,9 +12,6 @@ class WikipediaSearch(BaseSearch):
     def __init__(self, wiki_config: BaseConfig | None = None):
         self.wiki_config = wiki_config if wiki_config else BaseConfig()
 
-    async def _handle(self, query: str) -> List[SearchResult]:
-        return await self._search(query)
-
     async def _compile(self, query: str) -> str:
         results = await self._search(query)
         return "\n\n".join(str(r) for r in results)
