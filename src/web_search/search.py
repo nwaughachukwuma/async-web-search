@@ -26,9 +26,8 @@ class WebSearch:
         self.github = GitHubSearch(github_config=self.config.github_config)
         self.pubmed = PubMedSearch(pubmed_config=self.config.pubmed_config)
 
-        # User-supplied plugin instances inheriting from BaseSearch
-        config_plugins = self.config.plugins if hasattr(self.config, "plugins") else []
-        self.plugins = [p for p in config_plugins if isinstance(p, PluginSearch)]
+        # User-supplied plugin instances
+        self.plugins = [p for p in self.config.plugins if isinstance(p, PluginSearch)]
 
     async def search(self, query: str) -> List[Dict[str, str]]:
         """
