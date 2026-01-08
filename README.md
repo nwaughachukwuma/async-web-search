@@ -109,6 +109,54 @@ for result in results:
     print(result)
 ```
 
+## 🔌 Plugin System
+
+Need to search a data source that isn't bundled with the library? Create a plugin from `PluginSearch` and pass an **instance** via `WebSearchConfig.plugins`.
+
+#### Example
+
+```python
+from web_search import WebSearch, WebSearchConfig
+from web_search.base import PluginSearch, SearchResult
+
+class RedditSearch(PluginSearch):
+    slug = "reddit"
+
+    async def _search(self, query: str):
+        # ...call Reddit API here...
+        return [
+            SearchResult(
+                url="https://reddit.com/r/MachineLearning/1",
+                title="AMA about quantum ML",
+                preview="I recently built a quantum ...",
+                source=self.slug,
+            )
+        ]
+
+
+# Option 1: Register the plugin in WebSearchConfig
+config = WebSearchConfig(
+    sources=["google", "arxiv"],
+    plugins=[RedditSearch()]
+)
+
+results = await WebSearch(config).search("quantum computing")
+
+# Option 2: add plugin after initializing Websearch
+config = WebSearchConfig(
+    sources=["google", "arxiv"],
+)
+
+ws =  WebSearch(config)
+ws.add_plugin(RedditSearch())
+results = await ws.search("quantum computing")
+```
+
+#### Edge-cases handled automatically:
+
+1. Objects in the plugin list that do **not** inherit from `PluginSearch` are ignored.
+2. Exceptions raised inside a plugin are caught; other providers still return results.
+
 ## 🌐 Production API Server
 
 A FastAPI-based production server is available for teams that want to use async web search as a web service. The server is hosted at **https://awebs.veedo.ai** and can be run locally as well.

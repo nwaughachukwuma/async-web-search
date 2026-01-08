@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List
 
-from .config import SearchSources
+from .config import SearchSource
 
 
 @dataclass
@@ -10,7 +10,7 @@ class SearchResult:
     url: str
     title: str
     preview: str
-    source: SearchSources
+    source: SearchSource
 
     def __str__(self):
         return f"Source: {self.source}\nTitle: {self.title}\nPreview: {self.preview}"
