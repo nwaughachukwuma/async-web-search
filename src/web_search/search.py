@@ -26,7 +26,7 @@ class WebSearch:
         self.github = GitHubSearch(github_config=self.config.github_config)
         self.pubmed = PubMedSearch(pubmed_config=self.config.pubmed_config)
 
-        # User-supplied plugin instances
+        # User-supplied plugins
         self.plugins = [p for p in self.config.plugins if isinstance(p, PluginSearch)]
 
     async def search(self, query: str) -> List[Dict[str, str]]:

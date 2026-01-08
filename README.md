@@ -1,6 +1,6 @@
 # Web Search
 
-Async web search library supporting Google Custom Search, Wikipedia, arXiv, NewsAPI, GitHub, and PubMed APIs.
+Async web search library supporting Google Custom Search, Wikipedia, arXiv, NewsAPI, GitHub, and PubMed data sources.
 
 > You can search across multiple sources and retrieve relevant, clean results in JSON format or as compiled text.
 
