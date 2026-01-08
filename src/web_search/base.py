@@ -1,4 +1,6 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import List
 
 from .config import SearchSources
 
@@ -23,14 +25,15 @@ class SearchResult:
         }
 
 
-class BaseSearch:
-    async def _search(self, _query: str):
+class BaseSearch(ABC):
+    @abstractmethod
+    async def _search(self, _query: str) -> List[SearchResult]:
         """
-        Context based search algorithm and workflow.
+        Context based search algorithm and workflow
         Args:
-            query (str): The search query string.
+            query (str): The search query string
         Return:
-            A list of `SearchResult` objects for a query.
+            A list of `SearchResult` objects for a query
         """
         raise NotImplementedError
 
@@ -42,7 +45,8 @@ class BaseSearch:
         Return:
             A formatted string representation of search results.
         """
-        ...
+        results = await self._search(_query)
+        return "\n\n".join(str(r) for r in results)
 
 
 class PluginSearch(BaseSearch):
