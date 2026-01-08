@@ -123,7 +123,7 @@ class RedditSearch(PluginSearch):
     slug = "reddit"
 
     async def _search(self, query: str):
-        # ...call Reddit API here...
+        # ...implement Reddit search here...
         return [
             SearchResult(
                 url="https://reddit.com/r/MachineLearning/1",
