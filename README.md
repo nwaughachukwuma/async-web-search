@@ -139,15 +139,12 @@ config = WebSearchConfig(
     sources=["google", "arxiv"],
     plugins=[RedditSearch()]
 )
-
 results = await WebSearch(config).search("quantum computing")
 
 # Option 2: add plugin after initializing Websearch
-config = WebSearchConfig(
+ws = WebSearch(config=WebSearchConfig(
     sources=["google", "arxiv"],
-)
-
-ws =  WebSearch(config)
+))
 ws.add_plugin(RedditSearch())
 results = await ws.search("quantum computing")
 ```
