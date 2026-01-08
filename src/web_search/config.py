@@ -1,6 +1,9 @@
 import os
 from dataclasses import dataclass, field
-from typing import Literal, List
+from typing import TYPE_CHECKING, List, Literal
+
+if TYPE_CHECKING:
+    from .base import PluginSearch
 
 SearchSources = Literal["google", "wikipedia", "arxiv", "newsapi", "github", "pubmed"]
 
@@ -26,6 +29,7 @@ class NewsAPISearchConfig(BaseConfig):
 @dataclass
 class WebSearchConfig:
     sources: List[SearchSources] = field(default_factory=lambda: ["google"])
+    plugins: List["PluginSearch"] = field(default_factory=lambda: [])
     google_config: GoogleSearchConfig | None = None
     wiki_config: BaseConfig | None = None
     arxiv_config: BaseConfig | None = None

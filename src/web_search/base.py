@@ -24,10 +24,26 @@ class SearchResult:
 
 
 class BaseSearch:
-    def _compile(self, _query: str):
-        """search and compile the result into a string"""
-        pass
+    async def _search(self, _query: str):
+        """
+        Context based search algorithm and workflow.
+        Args:
+            query (str): The search query string.
+        Return:
+            A list of `SearchResult` objects for a query.
+        """
+        raise NotImplementedError
 
-    def _search(self, _query: str):
-        """context based search algorithm and workflow"""
-        pass
+    async def _compile(self, _query: str) -> str:
+        """
+        Search and compile the result into a string
+        Args:
+            query (str): The search query string.
+        Return:
+            A formatted string representation of search results.
+        """
+        ...
+
+
+class PluginSearch(BaseSearch):
+    slug: str
