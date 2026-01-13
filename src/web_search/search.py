@@ -1,8 +1,8 @@
 import asyncio
-from typing import Any, Coroutine, Dict, List
+from typing import Dict, List
 
 from .arxiv import ArxivSearch
-from .base import PluginSearch, SearchResult
+from .base import BaseSearch, PluginSearch
 from .config import WebSearchConfig
 from .github import GitHubSearch
 from .google import GoogleSearch
@@ -29,54 +29,46 @@ class WebSearch:
         # User-supplied plugins
         self.plugins = [p for p in self.config.plugins if isinstance(p, PluginSearch)]
 
+    def gather(self) -> List[BaseSearch]:
+        """
+        Gather the relevant search tasks/logic and plugin
+        """
+        tasks: List[BaseSearch] = []
+
+        if "google" in self.config.sources:
+            tasks.append(self.google)
+        if "wikipedia" in self.config.sources:
+            tasks.append(self.wikipedia)
+        if "arxiv" in self.config.sources:
+            tasks.append(self.arxiv)
+        if "newsapi" in self.config.sources:
+            tasks.append(self.newsapi)
+        if "github" in self.config.sources:
+            tasks.append(self.github)
+        if "pubmed" in self.config.sources:
+            tasks.append(self.pubmed)
+
+        for plugin in self.plugins:
+            tasks.append(plugin)
+
+        return tasks
+
     async def search(self, query: str) -> List[Dict[str, str]]:
         """
         Search the web for relevant content and return structured results
         """
-        tasks: List[Coroutine[Any, Any, List[SearchResult]]] = []
+        coros = [task._search(query) for task in self.gather()]
+        results = await asyncio.gather(*coros, return_exceptions=True)
 
-        if "google" in self.config.sources:
-            tasks.append(self.google._search(query))
-        if "wikipedia" in self.config.sources:
-            tasks.append(self.wikipedia._search(query))
-        if "arxiv" in self.config.sources:
-            tasks.append(self.arxiv._search(query))
-        if "newsapi" in self.config.sources:
-            tasks.append(self.newsapi._search(query))
-        if "github" in self.config.sources:
-            tasks.append(self.github._search(query))
-        if "pubmed" in self.config.sources:
-            tasks.append(self.pubmed._search(query))
-
-        for plugin in self.plugins:
-            tasks.append(plugin._search(query))
-
-        results = await asyncio.gather(*tasks, return_exceptions=True)
         return [item.to_dict() for r in results if not isinstance(r, BaseException) for item in r]
 
     async def compile_search(self, query: str):
         """
         Search the web for relevant content and compile into a string
         """
-        tasks: List[Coroutine[Any, Any, str]] = []
+        coros = [task._compile(query) for task in self.gather()]
+        results = await asyncio.gather(*coros, return_exceptions=True)
 
-        if "google" in self.config.sources:
-            tasks.append(self.google._compile(query))
-        if "wikipedia" in self.config.sources:
-            tasks.append(self.wikipedia._compile(query))
-        if "arxiv" in self.config.sources:
-            tasks.append(self.arxiv._compile(query))
-        if "newsapi" in self.config.sources:
-            tasks.append(self.newsapi._compile(query))
-        if "github" in self.config.sources:
-            tasks.append(self.github._compile(query))
-        if "pubmed" in self.config.sources:
-            tasks.append(self.pubmed._compile(query))
-
-        for plugin in self.plugins:
-            tasks.append(plugin._compile(query))
-
-        results = await asyncio.gather(*tasks, return_exceptions=True)
         return "\n\n".join(r for r in results if isinstance(r, str))
 
     def add_plugin(self, plugins: List[PluginSearch]):
