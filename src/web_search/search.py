@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, List
+from typing import Dict, Generator, List
 
 from .arxiv import ArxivSearch
 from .base import BaseSearch, PluginSearch
@@ -29,29 +29,25 @@ class WebSearch:
         # User-supplied plugins
         self.plugins = [p for p in self.config.plugins if isinstance(p, PluginSearch)]
 
-    def gather(self) -> List[BaseSearch]:
+    def gather(self) -> Generator[BaseSearch]:
         """
         Gather the relevant search tasks/logic and plugin
         """
-        tasks: List[BaseSearch] = []
-
         if "google" in self.config.sources:
-            tasks.append(self.google)
+            yield self.google
         if "wikipedia" in self.config.sources:
-            tasks.append(self.wikipedia)
+            yield self.wikipedia
         if "arxiv" in self.config.sources:
-            tasks.append(self.arxiv)
+            yield self.arxiv
         if "newsapi" in self.config.sources:
-            tasks.append(self.newsapi)
+            yield self.newsapi
         if "github" in self.config.sources:
-            tasks.append(self.github)
+            yield self.github
         if "pubmed" in self.config.sources:
-            tasks.append(self.pubmed)
+            yield self.pubmed
 
         for plugin in self.plugins:
-            tasks.append(plugin)
-
-        return tasks
+            yield plugin
 
     async def search(self, query: str) -> List[Dict[str, str]]:
         """
