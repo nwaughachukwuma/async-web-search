@@ -1,6 +1,6 @@
 # Web Search
 
-Async web search library supporting Google Custom Search, Wikipedia, arXiv, NewsAPI, GitHub, and PubMed APIs.
+Async web search library supporting Google Custom Search, Wikipedia, arXiv, NewsAPI, GitHub, and PubMed data sources.
 
 > You can search across multiple sources and retrieve relevant, clean results in JSON format or as compiled text.
 
@@ -108,6 +108,51 @@ results = await ArxivSearch(arxiv_config)._search("neural networks")
 for result in results:
     print(result)
 ```
+
+## 🔌 Plugin System
+
+Need to search a data source that isn't bundled with the library? Create a plugin from `PluginSearch` and pass an **instance** via `WebSearchConfig.plugins`.
+
+#### Example
+
+```python
+from web_search import WebSearch, WebSearchConfig
+from web_search.base import PluginSearch, SearchResult
+
+class RedditSearch(PluginSearch):
+    slug = "reddit"
+
+    async def _search(self, query: str):
+        # ...implement Reddit search here...
+        return [
+            SearchResult(
+                url="https://reddit.com/r/MachineLearning/1",
+                title="AMA about quantum ML",
+                preview="I recently built a quantum ...",
+                source=self.slug,
+            )
+        ]
+
+
+# Option 1: Register the plugin in WebSearchConfig
+config = WebSearchConfig(
+    sources=["google", "arxiv"],
+    plugins=[RedditSearch()]
+)
+results = await WebSearch(config).search("quantum computing")
+
+# Option 2: add plugin after initializing Websearch
+ws = WebSearch(config=WebSearchConfig(
+    sources=["google", "arxiv"],
+))
+ws.add_plugin(RedditSearch())
+results = await ws.search("quantum computing")
+```
+
+#### Edge-cases handled automatically:
+
+1. Objects in the plugin list that do **not** inherit from `PluginSearch` are ignored.
+2. Exceptions raised inside a plugin are caught; other providers still return results.
 
 ## 🌐 Production API Server
 

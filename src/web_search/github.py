@@ -12,10 +12,6 @@ class GitHubSearch(BaseSearch):
     def __init__(self, github_config: BaseConfig | None = None):
         self.github_config = github_config if github_config else BaseConfig()
 
-    async def _compile(self, query: str) -> str:
-        results = await self._search(query)
-        return "\n\n".join(str(r) for r in results)
-
     async def _search(self, query: str) -> List[SearchResult]:
         """
         Search GitHub repositories

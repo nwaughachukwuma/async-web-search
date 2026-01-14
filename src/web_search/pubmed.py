@@ -14,10 +14,6 @@ class PubMedSearch(BaseSearch):
     def __init__(self, pubmed_config: BaseConfig | None = None):
         self.pubmed_config = pubmed_config if pubmed_config else BaseConfig()
 
-    async def _compile(self, query: str) -> str:
-        results = await self._search(query)
-        return "\n\n".join(str(r) for r in results)
-
     async def _search(self, query: str) -> List[SearchResult]:
         """
         Search PubMed articles

@@ -181,7 +181,12 @@ async def test_websearch_search_handles_exceptions():
         search.google = AsyncMock()
         search.google._search = AsyncMock(
             return_value=[
-                SearchResult(url="https://google.com/1", title="Google Result", preview="Preview", source="google")
+                SearchResult(
+                    url="https://google.com/1",
+                    title="Google Result",
+                    preview="Preview",
+                    source="google",
+                )
             ]
         )
         search.arxiv = AsyncMock()

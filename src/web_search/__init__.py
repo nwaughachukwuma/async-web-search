@@ -3,7 +3,7 @@ from .config import (
     BaseConfig,
     GoogleSearchConfig,
     NewsAPISearchConfig,
-    SearchSources,
+    SearchSource,
     WebSearchConfig,
 )
 from .github import GitHubSearch
@@ -19,7 +19,7 @@ __all__ = [
     "NewsAPISearch",
     "NewsAPISearchConfig",
     "PubMedSearch",
-    "SearchSources",
+    "SearchSource",
     "SearchResult",
     "WebSearch",
     "WebSearchConfig",

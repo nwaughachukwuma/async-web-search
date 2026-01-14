@@ -17,10 +17,6 @@ class GoogleSearch(BaseSearch):
     def __init__(self, google_config: GoogleSearchConfig | None = None):
         self.google_config = google_config if google_config else GoogleSearchConfig()
 
-    async def _compile(self, query: str):
-        results = await self._search(query)
-        return "\n\n".join(str(r) for r in results if r.preview)
-
     async def _search(self, query: str, **kwargs):
         """
         Google search using the Custom Search Engine API
@@ -60,7 +56,7 @@ class GoogleSearch(BaseSearch):
             return []
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        return [item for item in results if isinstance(item, SearchResult)]
+        return [r for r in results if isinstance(r, SearchResult) and r.preview]
 
     def _is_valid_url(self, url: str) -> bool:
         invalid_extensions = (

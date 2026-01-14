@@ -5,8 +5,8 @@ build-backend = "hatchling.build"
 [project]
 name = "async-web-search"
 requires-python = ">=3.10"
-version = "1.1.0"
-description = "Async web search library supporting Google, Wikipedia, arXiv, NewsAPI, GitHub, and PubMed APIs."
+version = "1.2.0"
+description = "Async web search library supporting Google, Wikipedia, arXiv, NewsAPI, GitHub, and PubMed data sources."
 
 readme = "README.md"
 license = "MIT"

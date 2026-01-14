@@ -12,10 +12,6 @@ class NewsAPISearch(BaseSearch):
     def __init__(self, newsapi_config: NewsAPISearchConfig | None = None):
         self.newsapi_config = newsapi_config if newsapi_config else NewsAPISearchConfig()
 
-    async def _compile(self, query: str) -> str:
-        results = await self._search(query)
-        return "\n\n".join(str(r) for r in results)
-
     async def _search(self, query: str) -> List[SearchResult]:
         """
         Search news articles using NewsAPI

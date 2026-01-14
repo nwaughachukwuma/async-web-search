@@ -13,10 +13,6 @@ class ArxivSearch(BaseSearch):
     def __init__(self, arxiv_config: BaseConfig | None = None):
         self.arxiv_config = arxiv_config if arxiv_config else BaseConfig()
 
-    async def _compile(self, query: str) -> str:
-        results = await self._search(query)
-        return "\n\n".join(str(r) for r in results)
-
     async def _search(self, query: str) -> List[SearchResult]:
         """
         Search by fetching papers from arXiv
