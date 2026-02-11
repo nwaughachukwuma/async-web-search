@@ -29,7 +29,7 @@ class WebSearch:
         # User-supplied plugins
         self.plugins = [p for p in self.config.plugins if isinstance(p, PluginSearch)]
 
-    def gather(self) -> Generator[BaseSearch]:
+    def gather(self) -> Generator[BaseSearch, None, None]:
         """
         Gather the relevant search tasks/logic and plugin
         """
