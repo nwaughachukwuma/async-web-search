@@ -5,16 +5,20 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 
-from web_search import BaseConfig, GoogleSearchConfig, NewsAPISearchConfig, SearchSources, WebSearch, WebSearchConfig
+from web_search import BaseConfig, GoogleSearchConfig, NewsAPISearchConfig, WebSearch, WebSearchConfig
+from web_search.config import SearchSource
 
 from .utils import validate_api_keys
 
-app = FastAPI(title="Async WebSearch Demo", description="Production-scale async web search API")
+app = FastAPI(
+    title="Async WebSearch Demo",
+    description="Production-scale async web search API",
+)
 
 
 class SearchRequest(BaseModel):
     query: str
-    sources: List[SearchSources] = ["google"]
+    sources: List[SearchSource] = ["google"]
     max_results: int = 3
     timeout: Optional[float] = None
 

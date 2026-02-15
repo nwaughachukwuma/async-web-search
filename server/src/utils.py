@@ -3,10 +3,10 @@ from typing import List
 
 from fastapi import HTTPException
 
-from web_search import SearchSources
+from web_search.config import SearchSource
 
 
-def validate_api_keys(sources: List[SearchSources]):
+def validate_api_keys(sources: List[SearchSource]):
     if "google" in sources:
         if not os.environ.get("GOOGLE_API_KEY", "") or not os.environ.get("CSE_ID", ""):
             raise HTTPException(500, "GOOGLE_API_KEY or CSE_ID is missing")
